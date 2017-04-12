@@ -38,7 +38,7 @@ import json
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 23306,
+tf.app.flags.DEFINE_integer('run_id', 6193,
                             'This is the run number (pid) for training proc')
 
 tf.app.flags.DEFINE_string('device_id', '/cpu:0',
@@ -53,7 +53,7 @@ tf.app.flags.DEFINE_string('eval_data', 'valid',
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
                             'Number of preprocessing threads')
 
-tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 5,
+tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 2,
                             """How often to run the eval.""")
 tf.app.flags.DEFINE_integer('num_examples', 10000,
                             """Number of examples to run.""")
@@ -75,6 +75,19 @@ tf.app.flags.DEFINE_string('model_type', 'default',
 tf.app.flags.DEFINE_string('requested_step_seq', '', 'Requested step to restore')
 FLAGS = tf.app.flags.FLAGS
 
+LAMBDA = 0.01
+
+
+def loss(logits, labels):
+    labels = tf.cast(labels, tf.int32)
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
+        logits=logits, labels=labels, name='cross_entropy_per_example')
+    cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
+
+    regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
+    return total_loss
+
 
 def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, requested_step=None):
     """Run Eval once.
@@ -84,11 +97,12 @@ def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, reque
     top_k_op: Top K op.
     summary_op: Summary op.
     """
+    _loss = loss(logits, labels)
     top1 = tf.nn.in_top_k(logits, labels, 1)
     top2 = tf.nn.in_top_k(logits, labels, 2)
 
     with tf.Session() as sess:
-        checkpoint_path = '%s/run-%d' % (FLAGS.train_dir, FLAGS.run_id)
+        checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, FLAGS.run_id)
 
         model_checkpoint_path, global_step = get_checkpoint(checkpoint_path, requested_step, FLAGS.checkpoint)
 
@@ -103,22 +117,16 @@ def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, reque
                                                  start=True))
             num_steps = int(math.ceil(num_eval / FLAGS.batch_size))
             true_count1 = true_count2 = 0
+            total_loss = 0.0
             total_sample_count = num_steps * FLAGS.batch_size
             step = 0
             print(FLAGS.batch_size, num_steps)
 
             while step < num_steps and not coord.should_stop():
-                start_time = time.time()
-                v, predictions1, predictions2 = sess.run([logits, top1, top2])
-                duration = time.time() - start_time
-                sec_per_batch = float(duration)
-                examples_per_sec = FLAGS.batch_size / sec_per_batch
-
+                v, predictions1, predictions2, loss_value = sess.run([logits, top1, top2, _loss])
                 true_count1 += np.sum(predictions1)
                 true_count2 += np.sum(predictions2)
-                format_str = ('%s (%.1f examples/sec; %.3f sec/batch)')
-                print(format_str % (datetime.now(),
-                                    examples_per_sec, sec_per_batch))
+                total_loss += loss_value
 
                 step += 1
 
@@ -126,13 +134,16 @@ def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, reque
 
             precision1 = true_count1 / total_sample_count
             precision2 = true_count2 / total_sample_count
-            print('%s: precision @ 1 = %.3f (%d/%d)' % (datetime.now(), precision1, true_count1, total_sample_count))
-            print('%s: precision @ 2 = %.3f (%d/%d)' % (datetime.now(), precision2, true_count2, total_sample_count))
+            total_loss /= num_steps
+            print('step%d: loss = %.3f' % (global_step, total_loss))
+            print('step%d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
+            print('step%d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
 
             summary = tf.Summary()
             summary.ParseFromString(sess.run(summary_op))
             summary.value.add(tag='Precision @ 1', simple_value=precision1)
             summary.value.add(tag='Precision @ 2', simple_value=precision2)
+            summary.value.add(tag='cost', simple_value=total_loss)
             summary_writer.add_summary(summary, global_step)
         except Exception as e:  # pylint: disable=broad-except
             coord.request_stop(e)
@@ -163,6 +174,10 @@ def evaluate(run_dir):
             summary_writer = tf.summary.FileWriter(run_dir, g)
             saver = tf.train.Saver()
 
+            for requested_step in range(0, 10000, 1000):
+                print('Running %s' % requested_step)
+                eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, requested_step)
+            '''
             if FLAGS.requested_step_seq:
                 sequence = FLAGS.requested_step_seq.split(',')
                 for requested_step in sequence:
@@ -175,10 +190,11 @@ def evaluate(run_dir):
                     if FLAGS.run_once:
                         break
                     time.sleep(FLAGS.eval_interval_secs)
+            '''
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-    run_dir = '%s/run-%d' % (FLAGS.eval_dir, FLAGS.run_id)
+    run_dir = '%s/run-%d/valid' % (FLAGS.eval_dir, FLAGS.run_id)
     if tf.gfile.Exists(run_dir):
         tf.gfile.DeleteRecursively(run_dir)
     tf.gfile.MakeDirs(run_dir)
