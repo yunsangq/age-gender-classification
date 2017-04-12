@@ -96,7 +96,6 @@ def loss(logits, labels):
     losses = tf.get_collection('losses')
     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
-    tf.summary.scalar('cost', total_loss)
     # total_loss = tf.add_n(losses + regularization_losses, name='total_loss')
     loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
     loss_averages_op = loss_averages.apply(losses + [total_loss])
@@ -118,7 +117,7 @@ def valid_loss(logits, labels):
     return total_loss
 
 
-def eval_once(sess, summary_writer, logits, labels, num_eval, global_step):
+def eval_once(sess, summary_op, summary_writer, logits, labels, num_eval, global_step):
     total_loss = valid_loss(logits, labels)
     top1 = tf.nn.in_top_k(logits, labels, 1)
     top2 = tf.nn.in_top_k(logits, labels, 2)
@@ -143,13 +142,11 @@ def eval_once(sess, summary_writer, logits, labels, num_eval, global_step):
     print('step %d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
     print('step %d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
 
-    summary_op = tf.summary.merge_all()
-    tf.summary.scalar('cost', _loss)
     summary = tf.Summary()
     summary.ParseFromString(sess.run(summary_op))
+    summary.value.add(tag='cost', simple_value=_loss)
     summary.value.add(tag='Precision @ 1', simple_value=precision1)
     summary.value.add(tag='Precision @ 2', simple_value=precision2)
-
     summary_writer.add_summary(summary, global_step)
 
 
@@ -221,7 +218,8 @@ def main(argv=None):
 
         for step in xrange(num_steps):
             if step == 0:
-                eval_once(sess, valid_writer, valid_logits, valid_labels, num_eval, step)
+                eval_once(sess, summary_op, valid_writer, valid_logits, valid_labels, num_eval, step)
+
             start_time = time.time()
             _, loss_value = sess.run([train_op, total_loss])
             duration = time.time() - start_time
@@ -239,10 +237,12 @@ def main(argv=None):
 
             # Loss only actually evaluated every 100 steps?
             if step % 100 == 0:
-                summary_str = sess.run(summary_op)
-                summary_writer.add_summary(summary_str, step)
+                summary = tf.Summary()
+                summary.ParseFromString(sess.run(summary_op))
+                summary.value.add(tag='cost', simple_value=loss_value)
+                summary_writer.add_summary(summary, step)
                 if step != 0:
-                    eval_once(sess, valid_writer, valid_logits, valid_labels, num_eval, step)
+                    eval_once(sess, summary_op, valid_writer, valid_logits, valid_labels, num_eval, step)
 
             if step % 1000 == 0 or (step + 1) == num_steps:
                 saver.save(sess, checkpoint_path, global_step=step)
