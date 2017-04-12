@@ -15,24 +15,28 @@ RESIZE_HEIGHT = 256
 RESIZE_WIDTH = 256
 
 tf.app.flags.DEFINE_string('fold_dir',
-                           '/home/dpressel/dev/work/AgeGenderDeepLearning/Folds/train_val_txt_files_per_fold/test_fold_is_0',
+                           './Folds/train_val_txt_files_per_fold/test_fold_is_0',
                            'Fold directory')
 
-tf.app.flags.DEFINE_string('data_dir', '/data/xdata/age-gender/aligned',
+tf.app.flags.DEFINE_string('data_dir', '../models/age-gender/aligned',
                            'Data directory')
 
-tf.app.flags.DEFINE_string('output_dir', '/home/dpressel/dev/work/AgeGenderDeepLearning/Folds/tf/test_fold_is_0',
+tf.app.flags.DEFINE_string('output_dir', './Folds/tf/age_test_fold_is_0',
                            'Output directory')
 
 tf.app.flags.DEFINE_string('train_list', 'age_train.txt',
                            'Training list')
 tf.app.flags.DEFINE_string('valid_list', 'age_val.txt',
+                           'Validation list')
+tf.app.flags.DEFINE_string('test_list', 'age_test.txt',
                            'Test list')
 
 tf.app.flags.DEFINE_integer('train_shards', 10,
                             'Number of shards in training TFRecord files.')
 tf.app.flags.DEFINE_integer('valid_shards', 2,
                             'Number of shards in validation TFRecord files.')
+tf.app.flags.DEFINE_integer('test_shards', 4,
+                            'Number of shards in test TFRecord files.')
 
 tf.app.flags.DEFINE_integer('num_threads', 2,
                             'Number of threads to preprocess the images.')
@@ -301,6 +305,8 @@ def main(unused_argv):
         os.makedirs(FLAGS.output_dir)
 
     # Run it!
+    test, test_outcomes = _process_dataset('test', '%s/%s' % (FLAGS.fold_dir, FLAGS.test_list), FLAGS.data_dir,
+                                           FLAGS.test_shards)
     valid, valid_outcomes = _process_dataset('validation', '%s/%s' % (FLAGS.fold_dir, FLAGS.valid_list), FLAGS.data_dir,
                                              FLAGS.valid_shards)
     train, train_outcomes = _process_dataset('train', '%s/%s' % (FLAGS.fold_dir, FLAGS.train_list), FLAGS.data_dir,
@@ -310,10 +316,16 @@ def main(unused_argv):
         print('Warning: unattested labels in training data [%s]' % (
         ', '.join(valid_outcomes | train_outcomes) - valid_outcomes))
 
+    if len(test_outcomes) != len(test_outcomes | train_outcomes):
+        print('Warning: unattested labels in training data [%s]' % (
+        ', '.join(test_outcomes | train_outcomes) - test_outcomes))
+
     output_file = os.path.join(FLAGS.output_dir, 'md.json')
 
-    md = {'num_valid_shards': FLAGS.valid_shards,
+    md = {'num_test_shards': FLAGS.test_shards,
+          'num_valid_shards': FLAGS.valid_shards,
           'num_train_shards': FLAGS.train_shards,
+          'test_counts': test,
           'valid_counts': valid,
           'train_counts': train,
           'timestamp': str(datetime.now()),

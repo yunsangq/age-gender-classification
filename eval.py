@@ -35,16 +35,16 @@ from model import select_model, get_checkpoint
 import os
 import json
 
-tf.app.flags.DEFINE_string('train_dir', '/home/dpressel/dev/work/AgeGenderDeepLearning/Folds/tf/test_fold_is_0',
+tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 0,
+tf.app.flags.DEFINE_integer('run_id', 23306,
                             'This is the run number (pid) for training proc')
 
 tf.app.flags.DEFINE_string('device_id', '/cpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('eval_dir', '/home/dpressel/dev/work/AgeGenderDeepLearning/Folds/tf/eval_test_fold_is_0',
+tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/eval_test_fold_is_0',
                            'Directory to put output to')
 
 tf.app.flags.DEFINE_string('eval_data', 'valid',

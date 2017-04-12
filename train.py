@@ -3,14 +3,15 @@ from __future__ import division
 from __future__ import print_function
 
 from datetime import datetime
+import math
 import time
 import os
 import numpy as np
 import tensorflow as tf
 from data import distorted_inputs
+from data import inputs
 from model import select_model
 import json
-import re
 
 LAMBDA = 0.01
 MOM = 0.9
@@ -18,7 +19,10 @@ tf.app.flags.DEFINE_string('pre_checkpoint_path', '',
                            """If specified, restore this pretrained model """
                            """before beginning any training.""")
 
-tf.app.flags.DEFINE_string('train_dir', '/home/dpressel/dev/work/AgeGenderDeepLearning/Folds/tf/test_fold_is_0',
+tf.app.flags.DEFINE_string('eval_data', 'valid',
+                           'Data type (valid|train)')
+
+tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory')
 
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
@@ -36,10 +40,10 @@ tf.app.flags.DEFINE_integer('image_size', 227,
 tf.app.flags.DEFINE_float('eta', 0.002,
                           'Learning rate')
 
-tf.app.flags.DEFINE_float('pdrop', 0.,
+tf.app.flags.DEFINE_float('pdrop', 0.5,
                           'Dropout probability')
 
-tf.app.flags.DEFINE_integer('max_steps', 15000,
+tf.app.flags.DEFINE_integer('max_steps', 10000,
                             'Number of iterations')
 
 tf.app.flags.DEFINE_integer('epochs', -1,
@@ -92,7 +96,7 @@ def loss(logits, labels):
     losses = tf.get_collection('losses')
     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
-    tf.summary.scalar('tl (raw)', total_loss)
+    tf.summary.scalar('cost', total_loss)
     # total_loss = tf.add_n(losses + regularization_losses, name='total_loss')
     loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
     loss_averages_op = loss_averages.apply(losses + [total_loss])
@@ -102,6 +106,51 @@ def loss(logits, labels):
     with tf.control_dependencies([loss_averages_op]):
         total_loss = tf.identity(total_loss)
     return total_loss
+
+
+def valid_loss(logits, labels):
+    labels = tf.cast(labels, tf.int32)
+    cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
+        logits=logits, labels=labels, name='valid_cross_entropy_per_example')
+    cross_entropy_mean = tf.reduce_mean(cross_entropy, name='valid_cross_entropy')
+    regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
+    return total_loss
+
+
+def eval_once(sess, summary_writer, logits, labels, num_eval, global_step):
+    total_loss = valid_loss(logits, labels)
+    top1 = tf.nn.in_top_k(logits, labels, 1)
+    top2 = tf.nn.in_top_k(logits, labels, 2)
+
+    print('Validation')
+    num_steps = int(math.ceil(num_eval / FLAGS.batch_size))
+    true_count1 = true_count2 = 0
+    loss_count = 0.0
+    total_sample_count = num_steps * FLAGS.batch_size
+    for step in xrange(num_steps):
+        v, predictions1, predictions2, loss_value = sess.run([logits, top1, top2, total_loss])
+        true_count1 += np.sum(predictions1)
+        true_count2 += np.sum(predictions2)
+        loss_count += loss_value
+
+    precision1 = true_count1 / total_sample_count
+    precision2 = true_count2 / total_sample_count
+    _loss = loss_count / float(num_steps)
+
+    format_str = ('%s: step %d, loss = %.3f')
+    print(format_str % (datetime.now(), global_step, _loss))
+    print('step %d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
+    print('step %d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
+
+    summary_op = tf.summary.merge_all()
+    tf.summary.scalar('cost', _loss)
+    summary = tf.Summary()
+    summary.ParseFromString(sess.run(summary_op))
+    summary.value.add(tag='Precision @ 1', simple_value=precision1)
+    summary.value.add(tag='Precision @ 2', simple_value=precision2)
+
+    summary_writer.add_summary(summary, global_step)
 
 
 def main(argv=None):
@@ -114,6 +163,14 @@ def main(argv=None):
         with open(input_file, 'r') as f:
             md = json.load(f)
 
+        # Validation
+        eval_data = FLAGS.eval_data == 'valid'
+        num_eval = md['%s_counts' % FLAGS.eval_data]
+        valid_images, valid_labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size, train=not eval_data,
+                                               num_preprocess_threads=FLAGS.num_preprocess_threads)
+        valid_logits = model_fn(md['nlabels'], valid_images, 1, False)
+
+        # Training
         images, labels, _ = distorted_inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
                                              FLAGS.num_preprocess_threads)
         logits = model_fn(md['nlabels'], images, 1 - FLAGS.pdrop, True)
@@ -143,7 +200,8 @@ def main(argv=None):
                 print('%s: Pre-trained model restored from %s' %
                       (datetime.now(), FLAGS.pre_checkpoint_path))
 
-        run_dir = '%s/run-%d' % (FLAGS.train_dir, os.getpid())
+        run_dir = '%s/run-%d/train' % (FLAGS.train_dir, os.getpid())
+        valid_run_dir = '%s/run-%d/valid' % (FLAGS.train_dir, os.getpid())
 
         checkpoint_path = '%s/%s' % (run_dir, FLAGS.checkpoint)
         if tf.gfile.Exists(run_dir) is False:
@@ -155,11 +213,15 @@ def main(argv=None):
         tf.train.start_queue_runners(sess=sess)
 
         summary_writer = tf.summary.FileWriter(run_dir, sess.graph)
+        valid_writer = tf.summary.FileWriter(valid_run_dir, sess.graph)
+
         steps_per_train_epoch = int(md['train_counts'] / FLAGS.batch_size)
         num_steps = FLAGS.max_steps if FLAGS.epochs < 1 else FLAGS.epochs * steps_per_train_epoch
         print('Requested number of steps [%d]' % num_steps)
 
         for step in xrange(num_steps):
+            if step == 0:
+                eval_once(sess, valid_writer, valid_logits, valid_labels, num_eval, step)
             start_time = time.time()
             _, loss_value = sess.run([train_op, total_loss])
             duration = time.time() - start_time
@@ -179,6 +241,8 @@ def main(argv=None):
             if step % 100 == 0:
                 summary_str = sess.run(summary_op)
                 summary_writer.add_summary(summary_str, step)
+                if step != 0:
+                    eval_once(sess, valid_writer, valid_logits, valid_labels, num_eval, step)
 
             if step % 1000 == 0 or (step + 1) == num_steps:
                 saver.save(sess, checkpoint_path, global_step=step)
