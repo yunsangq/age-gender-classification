@@ -34,13 +34,13 @@ import tensorflow as tf
 from model import select_model, get_checkpoint
 import os
 import json
-'''
+
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 7199,
+tf.app.flags.DEFINE_integer('run_id', 13537,
                             'This is the run number (pid) for training proc')
-'''
+
 tf.app.flags.DEFINE_string('device_id', '/cpu:0',
                            'What processing unit to execute inference on')
 
@@ -49,17 +49,17 @@ tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/eval_test_fold_is_0',
 
 tf.app.flags.DEFINE_string('eval_data', 'valid',
                            'Data type (valid|train)')
-'''
+
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
                             'Number of preprocessing threads')
-'''
+
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 2,
                             """How often to run the eval.""")
 tf.app.flags.DEFINE_integer('num_examples', 10000,
                             """Number of examples to run.""")
 tf.app.flags.DEFINE_boolean('run_once', False,
                             """Whether to run eval only once.""")
-'''
+
 tf.app.flags.DEFINE_integer('image_size', 227,
                             'Image size')
 
@@ -71,7 +71,7 @@ tf.app.flags.DEFINE_string('checkpoint', 'checkpoint',
 
 tf.app.flags.DEFINE_string('model_type', 'default',
                            'Type of convnet')
-'''
+
 tf.app.flags.DEFINE_string('requested_step_seq', '', 'Requested step to restore')
 FLAGS = tf.app.flags.FLAGS
 
@@ -195,14 +195,13 @@ def evaluate(run_dir, run_id):
             '''
 
 
-def main(run_id):  # pylint: disable=unused-argument
-    run_dir = '%s/run-%d/valid' % (FLAGS.train_dir, run_id)
+def main(argv=None):  # pylint: disable=unused-argument
+    run_dir = '%s/run-%d/valid' % (FLAGS.train_dir, FLAGS.run_id)
     if tf.gfile.Exists(run_dir):
         tf.gfile.DeleteRecursively(run_dir)
     tf.gfile.MakeDirs(run_dir)
-    evaluate(run_dir, run_id)
+    evaluate(run_dir, FLAGS.run_id)
 
-'''
 if __name__ == '__main__':
     tf.app.run()
-'''
+
