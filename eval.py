@@ -34,13 +34,13 @@ import tensorflow as tf
 from model import select_model, get_checkpoint
 import os
 import json
-
+'''
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 6193,
+tf.app.flags.DEFINE_integer('run_id', 7199,
                             'This is the run number (pid) for training proc')
-
+'''
 tf.app.flags.DEFINE_string('device_id', '/cpu:0',
                            'What processing unit to execute inference on')
 
@@ -49,17 +49,17 @@ tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/eval_test_fold_is_0',
 
 tf.app.flags.DEFINE_string('eval_data', 'valid',
                            'Data type (valid|train)')
-
+'''
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
                             'Number of preprocessing threads')
-
+'''
 tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 2,
                             """How often to run the eval.""")
 tf.app.flags.DEFINE_integer('num_examples', 10000,
                             """Number of examples to run.""")
 tf.app.flags.DEFINE_boolean('run_once', False,
                             """Whether to run eval only once.""")
-
+'''
 tf.app.flags.DEFINE_integer('image_size', 227,
                             'Image size')
 
@@ -71,14 +71,14 @@ tf.app.flags.DEFINE_string('checkpoint', 'checkpoint',
 
 tf.app.flags.DEFINE_string('model_type', 'default',
                            'Type of convnet')
-
+'''
 tf.app.flags.DEFINE_string('requested_step_seq', '', 'Requested step to restore')
 FLAGS = tf.app.flags.FLAGS
 
 LAMBDA = 0.01
 
 
-def loss(logits, labels):
+def eval_loss(logits, labels):
     labels = tf.cast(labels, tf.int32)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
         logits=logits, labels=labels, name='cross_entropy_per_example')
@@ -89,7 +89,7 @@ def loss(logits, labels):
     return total_loss
 
 
-def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, requested_step=None):
+def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id, requested_step=None):
     """Run Eval once.
     Args:
     saver: Saver.
@@ -97,15 +97,15 @@ def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, reque
     top_k_op: Top K op.
     summary_op: Summary op.
     """
-    _loss = loss(logits, labels)
+    _loss = eval_loss(logits, labels)
     top1 = tf.nn.in_top_k(logits, labels, 1)
     top2 = tf.nn.in_top_k(logits, labels, 2)
 
     with tf.Session() as sess:
-        checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, FLAGS.run_id)
+        checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, run_id)
 
         model_checkpoint_path, global_step = get_checkpoint(checkpoint_path, requested_step, FLAGS.checkpoint)
-
+        global_step = int(global_step)
         saver.restore(sess, model_checkpoint_path)
 
         # Start the queue runners.
@@ -152,7 +152,7 @@ def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, reque
         coord.join(threads, stop_grace_period_secs=10)
 
 
-def evaluate(run_dir):
+def evaluate(run_dir, run_id):
     with tf.Graph().as_default() as g:
         input_file = os.path.join(FLAGS.train_dir, 'md.json')
         print(input_file)
@@ -174,10 +174,12 @@ def evaluate(run_dir):
             summary_writer = tf.summary.FileWriter(run_dir, g)
             saver = tf.train.Saver()
 
-            for requested_step in range(0, 10000, 1000):
+            print('Validation')
+            eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id)
+            '''
+            for requested_step in range(6000, 10000, 1000):
                 print('Running %s' % requested_step)
                 eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, requested_step)
-            '''
             if FLAGS.requested_step_seq:
                 sequence = FLAGS.requested_step_seq.split(',')
                 for requested_step in sequence:
@@ -193,13 +195,14 @@ def evaluate(run_dir):
             '''
 
 
-def main(argv=None):  # pylint: disable=unused-argument
-    run_dir = '%s/run-%d/valid' % (FLAGS.eval_dir, FLAGS.run_id)
+def main(run_id):  # pylint: disable=unused-argument
+    run_dir = '%s/run-%d/valid' % (FLAGS.train_dir, run_id)
     if tf.gfile.Exists(run_dir):
         tf.gfile.DeleteRecursively(run_dir)
     tf.gfile.MakeDirs(run_dir)
-    evaluate(run_dir)
+    evaluate(run_dir, run_id)
 
-
+'''
 if __name__ == '__main__':
     tf.app.run()
+'''

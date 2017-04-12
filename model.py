@@ -158,7 +158,7 @@ def levi_hassner_bn(nlabels, images, pkeep, is_training):
 def levi_hassner(nlabels, images, pkeep, is_training):
     weight_decay = 0.0005
     weights_regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
-    with tf.variable_scope("LeviHassner", "LeviHassner", [images]) as scope:
+    with tf.variable_scope("LeviHassner"):
         with tf.contrib.slim.arg_scope(
                 [convolution2d, fully_connected],
                 weights_regularizer=weights_regularizer,
@@ -184,8 +184,8 @@ def levi_hassner(nlabels, images, pkeep, is_training):
                 full2 = fully_connected(drop1, 512, scope='full2')
                 drop2 = tf.nn.dropout(full2, pkeep, name='drop2')
 
-    with tf.variable_scope('output') as scope:
+    with tf.variable_scope('output'):
         weights = tf.Variable(tf.random_normal([512, nlabels], mean=0.0, stddev=0.01), name='weights')
         biases = tf.Variable(tf.constant(0.0, shape=[nlabels], dtype=tf.float32), name='biases')
-        output = tf.add(tf.matmul(drop2, weights), biases, name=scope.name)
+        output = tf.add(tf.matmul(drop2, weights), biases, name='output')
     return output
