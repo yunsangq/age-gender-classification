@@ -13,6 +13,12 @@ RESIZE_FINAL = 227
 GENDER_LIST = ['M', 'F']
 AGE_LIST = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 
+tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
+                           'Training directory (where training data lives)')
+
+tf.app.flags.DEFINE_integer('run_id', 10124,
+                            'This is the run number (pid) for training proc')
+
 tf.app.flags.DEFINE_string('model_dir', './Folds/tf/age_test_fold_is_0/run-10124/train',
                            'Model directory (where training data lives)')
 
@@ -54,7 +60,8 @@ def resolve_file(fname):
     return None
 
 
-def classify(sess, label_list, softmax_output, coder, images, image_file):
+def classify(sess, summary_op, summary_writer, label_list,
+             softmax_output, coder, images, image_file, global_step):
     print('Running file %s' % image_file)
     image_batch = make_batch(image_file, coder, not FLAGS.single_look)
     batch_results = sess.run(softmax_output, feed_dict={images: image_batch.eval()})
@@ -74,6 +81,10 @@ def classify(sess, label_list, softmax_output, coder, images, image_file):
         second_best = np.argmax(output)
 
         print('Guess @ 2 %s, prob = %.2f' % (label_list[second_best], output[second_best]))
+
+    summary_str = sess.run(summary_op, {images: image_batch.eval()})
+    summary_writer.add_summary(summary_str, global_step)
+
     return best_choice
 
 
@@ -88,6 +99,11 @@ def batchlist(srcfile):
 
 
 def main(argv=None):  # pylint: disable=unused-argument
+    run_dir = '%s/run-%d/guess' % (FLAGS.train_dir, FLAGS.run_id)
+    if tf.gfile.Exists(run_dir):
+        tf.gfile.DeleteRecursively(run_dir)
+    tf.gfile.MakeDirs(run_dir)
+
     with tf.Session() as sess:
         label_list = AGE_LIST if FLAGS.class_type == 'age' else GENDER_LIST
         nlabels = len(label_list)
@@ -100,8 +116,14 @@ def main(argv=None):  # pylint: disable=unused-argument
         checkpoint_path = '%s' % (FLAGS.model_dir)
         model_checkpoint_path, global_step = get_checkpoint(checkpoint_path)
 
-        saver = tf.train.Saver()
+        summary_op = tf.summary.merge_all()
+
+        summary_writer = tf.summary.FileWriter(run_dir, sess.graph)
+        saver = tf.train.Saver(tf.global_variables())
         saver.restore(sess, model_checkpoint_path)
+
+        init = tf.global_variables_initializer()
+        sess.run(init)
 
         softmax_output = tf.nn.softmax(logits)
 
@@ -136,7 +158,8 @@ def main(argv=None):  # pylint: disable=unused-argument
             if image_file is None: continue
 
             try:
-                best_choice = classify(sess, label_list, softmax_output, coder, images, image_file)
+                best_choice = classify(sess, summary_op, summary_writer, label_list,
+                                       softmax_output, coder, images, image_file, global_step)
                 if writer is not None:
                     writer.writerow((f, best_choice[0], '%.2f' % best_choice[1]))
             except Exception as e:
@@ -145,7 +168,6 @@ def main(argv=None):  # pylint: disable=unused-argument
 
         if output is not None:
             output.close()
-
 
 if __name__ == '__main__':
     tf.app.run()

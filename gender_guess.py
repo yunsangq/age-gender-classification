@@ -13,7 +13,7 @@ RESIZE_FINAL = 227
 GENDER_LIST = ['M', 'F']
 AGE_LIST = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 
-tf.app.flags.DEFINE_string('model_dir', './Folds/tf/gender_test_fold_is_0/run-10124',
+tf.app.flags.DEFINE_string('model_dir', './Folds/tf/gender_test_fold_is_0/run-19813/train',
                            'Model directory (where training data lives)')
 
 tf.app.flags.DEFINE_string('class_type', 'gender',
@@ -22,7 +22,7 @@ tf.app.flags.DEFINE_string('class_type', 'gender',
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('filename', './example_image.jpg',
+tf.app.flags.DEFINE_string('filename', './example_image6.jpg',
                            'File (Image) or File list (Text/No header TSV) to process')
 
 tf.app.flags.DEFINE_string('target', '',

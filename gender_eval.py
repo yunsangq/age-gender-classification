@@ -13,7 +13,7 @@ import json
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/gender_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 10124,
+tf.app.flags.DEFINE_integer('run_id', 19813,
                             'This is the run number (pid) for training proc')
 
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
@@ -55,7 +55,6 @@ def eval_loss(logits, labels):
 def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval):
     _loss = eval_loss(logits, labels)
     top1 = tf.nn.in_top_k(logits, labels, 1)
-    top2 = tf.nn.in_top_k(logits, labels, 2)
 
     checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, FLAGS.run_id)
 
@@ -71,16 +70,15 @@ def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval)
             threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
                                              start=True))
         num_steps = int(math.ceil(num_eval / FLAGS.batch_size))
-        true_count1 = true_count2 = 0
+        true_count1 = 0
         total_loss = 0.0
         total_sample_count = num_steps * FLAGS.batch_size
         step = 0
         print(FLAGS.batch_size, num_steps)
 
         while step < num_steps and not coord.should_stop():
-            v, predictions1, predictions2, loss_value = sess.run([logits, top1, top2, _loss])
+            v, predictions1, loss_value = sess.run([logits, top1, _loss])
             true_count1 += np.sum(predictions1)
-            true_count2 += np.sum(predictions2)
             total_loss += loss_value
 
             step += 1
@@ -88,16 +86,13 @@ def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval)
         # Compute precision @ 1.
 
         precision1 = true_count1 / total_sample_count
-        precision2 = true_count2 / total_sample_count
         total_loss /= num_steps
         print('step%d: loss = %.3f' % (global_step, total_loss))
         print('step%d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
-        print('step%d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
 
         summary = tf.Summary()
         summary.ParseFromString(sess.run(summary_op))
         summary.value.add(tag='Precision @ 1', simple_value=precision1)
-        summary.value.add(tag='Precision @ 2', simple_value=precision2)
         summary.value.add(tag='cost', simple_value=total_loss)
         summary_writer.add_summary(summary, global_step)
     except Exception as e:  # pylint: disable=broad-except
