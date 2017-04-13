@@ -117,9 +117,7 @@ def evaluate(run_dir):
         summary_op = tf.summary.merge_all()
 
         summary_writer = tf.summary.FileWriter(run_dir, sess.graph)
-        saver = tf.train.Saver(tf.global_variables())
-        init = tf.global_variables_initializer()
-        sess.run(init)
+        saver = tf.train.Saver()
 
         eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval)
 

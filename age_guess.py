@@ -28,7 +28,7 @@ tf.app.flags.DEFINE_string('class_type', 'age',
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('filename', './example_image3.jpg',
+tf.app.flags.DEFINE_string('filename', './example_image5.jpg',
                            'File (Image) or File list (Text/No header TSV) to process')
 
 tf.app.flags.DEFINE_string('target', '',
@@ -60,8 +60,8 @@ def resolve_file(fname):
     return None
 
 
-def classify(sess, summary_op, summary_writer, label_list,
-             softmax_output, coder, images, image_file, global_step):
+def classify(sess, label_list,
+             softmax_output, coder, images, image_file):
     print('Running file %s' % image_file)
     image_batch = make_batch(image_file, coder, not FLAGS.single_look)
     batch_results = sess.run(softmax_output, feed_dict={images: image_batch.eval()})
@@ -81,9 +81,6 @@ def classify(sess, summary_op, summary_writer, label_list,
         second_best = np.argmax(output)
 
         print('Guess @ 2 %s, prob = %.2f' % (label_list[second_best], output[second_best]))
-
-    summary_str = sess.run(summary_op, {images: image_batch.eval()})
-    summary_writer.add_summary(summary_str, global_step)
 
     return best_choice
 
@@ -116,14 +113,8 @@ def main(argv=None):  # pylint: disable=unused-argument
         checkpoint_path = '%s' % (FLAGS.model_dir)
         model_checkpoint_path, global_step = get_checkpoint(checkpoint_path)
 
-        summary_op = tf.summary.merge_all()
-
-        summary_writer = tf.summary.FileWriter(run_dir, sess.graph)
-        saver = tf.train.Saver(tf.global_variables())
+        saver = tf.train.Saver()
         saver.restore(sess, model_checkpoint_path)
-
-        init = tf.global_variables_initializer()
-        sess.run(init)
 
         softmax_output = tf.nn.softmax(logits)
 
@@ -158,8 +149,8 @@ def main(argv=None):  # pylint: disable=unused-argument
             if image_file is None: continue
 
             try:
-                best_choice = classify(sess, summary_op, summary_writer, label_list,
-                                       softmax_output, coder, images, image_file, global_step)
+                best_choice = classify(sess, label_list,
+                                       softmax_output, coder, images, image_file)
                 if writer is not None:
                     writer.writerow((f, best_choice[0], '%.2f' % best_choice[1]))
             except Exception as e:
