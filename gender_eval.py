@@ -10,7 +10,7 @@ from model import inference, get_checkpoint
 import os
 import json
 
-tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
+tf.app.flags.DEFINE_string('train_dir', './Folds/tf/gender_test_fold_is_0',
                            'Training directory (where training data lives)')
 
 tf.app.flags.DEFINE_integer('run_id', 10124,
@@ -19,7 +19,7 @@ tf.app.flags.DEFINE_integer('run_id', 10124,
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/eval_test_fold_is_0',
+tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/gender_eval_test_fold_is_0',
                            'Directory to put output to')
 
 tf.app.flags.DEFINE_string('eval_data', 'test',
