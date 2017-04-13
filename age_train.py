@@ -64,11 +64,11 @@ class Train(object):
 
     def train(self):
         images, labels, _ = distorted_inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
-                                             FLAGS.num_preprocess_threads)
-        eval_data = FLAGS.eval_data == 'valid'
+                                             mode='train',
+                                             num_preprocess_threads=FLAGS.num_preprocess_threads)
         self.num_eval = self.md['%s_counts' % FLAGS.eval_data]
         val_images, val_labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
-                                           mode=eval_data,
+                                           mode='valid',
                                            num_preprocess_threads=FLAGS.num_preprocess_threads)
 
         logits = inference(images, self.md['nlabels'], self.pdrop, reuse=False)

@@ -64,11 +64,11 @@ class Train(object):
 
     def train(self):
         images, labels, _ = distorted_inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
-                                             FLAGS.num_preprocess_threads)
-        eval_data = FLAGS.eval_data == 'valid'
+                                             mode='train',
+                                             num_preprocess_threads=FLAGS.num_preprocess_threads)
         self.num_eval = self.md['%s_counts' % FLAGS.eval_data]
         val_images, val_labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
-                                           mode=eval_data,
+                                           mode='valid',
                                            num_preprocess_threads=FLAGS.num_preprocess_threads)
 
         logits = inference(images, self.md['nlabels'], self.pdrop, reuse=False)
@@ -79,7 +79,6 @@ class Train(object):
 
         self.val_total_loss = self.eval_loss(val_logits, val_labels)
         self.top1 = tf.nn.in_top_k(val_logits, val_labels, 1)
-        self.top2 = tf.nn.in_top_k(val_logits, val_labels, 2)
 
         saver = tf.train.Saver(tf.global_variables())
         summary_op = tf.summary.merge_all()
@@ -209,19 +208,17 @@ class Train(object):
                 threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
                                                  start=True))
             num_steps = int(math.ceil(self.num_eval / FLAGS.batch_size))
-            true_count1 = true_count2 = 0
+            true_count1 = 0
             total_loss = 0.0
             total_sample_count = num_steps * FLAGS.batch_size
             step = 0
             print('Validation')
 
             while step < num_steps and not coord.should_stop():
-                predictions1, predictions2, loss_value = sess.run([self.top1,
-                                                                   self.top2,
-                                                                   self.val_total_loss],
-                                                                  {self.pdrop: 1})
+                predictions1, loss_value = sess.run([self.top1,
+                                                     self.val_total_loss],
+                                                    {self.pdrop: 1})
                 true_count1 += np.sum(predictions1)
-                true_count2 += np.sum(predictions2)
                 total_loss += loss_value
 
                 step += 1
@@ -229,16 +226,13 @@ class Train(object):
             # Compute precision @ 1.
 
             precision1 = true_count1 / total_sample_count
-            precision2 = true_count2 / total_sample_count
             total_loss /= num_steps
             print('step%d: loss = %.3f' % (global_step, total_loss))
             print('step%d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
-            print('step%d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
 
             summary = tf.Summary()
             summary.ParseFromString(sess.run(summary_op, {self.pdrop: 1}))
             summary.value.add(tag='Precision @ 1', simple_value=precision1)
-            summary.value.add(tag='Precision @ 2', simple_value=precision2)
             summary.value.add(tag='cost', simple_value=total_loss)
             summary_writer.add_summary(summary, global_step)
         except Exception as e:  # pylint: disable=broad-except

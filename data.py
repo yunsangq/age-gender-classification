@@ -16,7 +16,7 @@ def data_files(data_dir, subset):
     Raises:
       ValueError: if there are not data_files matching the subset.
     """
-    if subset not in ['train', 'validation']:
+    if subset not in ['train', 'validation', 'test']:
         print('Invalid subset!')
         exit(-1)
 
