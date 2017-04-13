@@ -8,7 +8,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from data import distorted_inputs, inputs
-from model import *
+from model import inference
 import json
 import math
 
@@ -18,7 +18,7 @@ tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory')
 
 tf.app.flags.DEFINE_string('eval_data', 'valid',
-                           'Data type (valid|train)')
+                           'Data type (valid|test)')
 
 tf.app.flags.DEFINE_boolean('log_device_placement', False,
                             """Whether to log device placement.""")
@@ -38,7 +38,7 @@ tf.app.flags.DEFINE_float('eta', 0.002,
 tf.app.flags.DEFINE_float('pdrop', 0.5,
                           'Dropout probability')
 
-tf.app.flags.DEFINE_integer('max_steps', 30000,
+tf.app.flags.DEFINE_integer('max_steps', 20000,
                             'Number of iterations')
 
 tf.app.flags.DEFINE_integer('epochs', -1,
@@ -50,8 +50,6 @@ tf.app.flags.DEFINE_integer('batch_size', 128,
 tf.app.flags.DEFINE_string('checkpoint', 'checkpoint',
                            'Checkpoint name')
 
-tf.app.flags.DEFINE_string('model_type', 'default',
-                           'Type of convnet')
 FLAGS = tf.app.flags.FLAGS
 
 
@@ -69,7 +67,8 @@ class Train(object):
                                              FLAGS.num_preprocess_threads)
         eval_data = FLAGS.eval_data == 'valid'
         self.num_eval = self.md['%s_counts' % FLAGS.eval_data]
-        val_images, val_labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size, train=not eval_data,
+        val_images, val_labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
+                                           mode=eval_data,
                                            num_preprocess_threads=FLAGS.num_preprocess_threads)
 
         logits = inference(images, self.md['nlabels'], self.pdrop, reuse=False)
@@ -173,7 +172,6 @@ class Train(object):
         regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
         tf.summary.scalar('tl (raw)', total_loss)
-        # total_loss = tf.add_n(losses + regularization_losses, name='total_loss')
         loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
         loss_averages_op = loss_averages.apply(losses + [total_loss])
         for l in losses + [total_loss]:
@@ -193,7 +191,6 @@ class Train(object):
         regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
         tf.summary.scalar('tl (raw)', total_loss)
-        # total_loss = tf.add_n(losses + regularization_losses, name='total_loss')
         loss_averages = tf.train.ExponentialMovingAverage(0.9, name='val_avg')
         loss_averages_op = loss_averages.apply(losses + [total_loss])
         for l in losses + [total_loss]:

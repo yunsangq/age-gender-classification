@@ -1,64 +1,32 @@
-"""
-At each tick, evaluate the latest checkpoint against some validation data.
-Or, you can run once by passing --run_once.  OR, you can pass a --requested_step_seq of comma separated checkpoint #s that already exist that it can run in a row.
-This program expects a training base directory with the data, and md.json file
-There will be sub-directories for each run underneath with the name run-<PID>
-where <PID> is the training program's process ID.  To run this program, you
-will need to pass --train_dir <DIR> which is the base path name, --run_id <PID>
-and if you are using a custom name for your checkpoint, you should
-pass that as well (most times you probably wont).  This will yield a model path:
-<DIR>/run-<PID>/checkpoint
-Note: If you are training to use the same GPU you can supposedly
-suspend the process.  I have not found this works reliably on my Linux machine.
-Instead, I have found that, often times, the GPU will not reclaim the resources
-and in that case, your eval may run out of GPU memory.
-You can alternately run trainining for a number of steps, break the program
-and run this, then restarting training from the old checkpoint.  I also
-found this inconvenient.  In order to control this better, the program
-requires that you explict placement of inference.  It defaults to the CPU
-so that it can easily run side by side with training.  This does make it
-much slower than if it was on the GPU, but for evaluation this may not be
-a major problem.  To place on the gpu, just pass --device_id /gpu:<ID> where
-<ID> is the GPU ID
-"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from datetime import datetime
 import math
-import time
 from data import inputs
 import numpy as np
 import tensorflow as tf
-from model import *
+from model import inference, get_checkpoint
 import os
 import json
 
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 21571,
+tf.app.flags.DEFINE_integer('run_id', 10124,
                             'This is the run number (pid) for training proc')
 
-tf.app.flags.DEFINE_string('device_id', '/cpu:0',
+tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
 tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/eval_test_fold_is_0',
                            'Directory to put output to')
 
-tf.app.flags.DEFINE_string('eval_data', 'valid',
-                           'Data type (valid|train)')
+tf.app.flags.DEFINE_string('eval_data', 'test',
+                           'Data type (valid|test)')
 
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
                             'Number of preprocessing threads')
-
-tf.app.flags.DEFINE_integer('eval_interval_secs', 60 * 2,
-                            """How often to run the eval.""")
-tf.app.flags.DEFINE_integer('num_examples', 10000,
-                            """Number of examples to run.""")
-tf.app.flags.DEFINE_boolean('run_once', False,
-                            """Whether to run eval only once.""")
 
 tf.app.flags.DEFINE_integer('image_size', 227,
                             'Image size')
@@ -69,10 +37,6 @@ tf.app.flags.DEFINE_integer('batch_size', 128,
 tf.app.flags.DEFINE_string('checkpoint', 'checkpoint',
                            'Checkpoint basename')
 
-tf.app.flags.DEFINE_string('model_type', 'default',
-                           'Type of convnet')
-
-tf.app.flags.DEFINE_string('requested_step_seq', '', 'Requested step to restore')
 FLAGS = tf.app.flags.FLAGS
 
 LAMBDA = 0.01
@@ -81,30 +45,32 @@ LAMBDA = 0.01
 def eval_loss(logits, labels):
     labels = tf.cast(labels, tf.int32)
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
-        logits=logits, labels=labels, name='cross_entropy_per_example')
-    cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
-
+        logits=logits, labels=labels, name='val_cross_entropy_per_example')
+    cross_entropy_mean = tf.reduce_mean(cross_entropy, name='val_cross_entropy')
+    tf.add_to_collection('val_losses', cross_entropy_mean)
+    losses = tf.get_collection('val_losses')
     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
+    tf.summary.scalar('tl (raw)', total_loss)
+    loss_averages = tf.train.ExponentialMovingAverage(0.9, name='val_avg')
+    loss_averages_op = loss_averages.apply(losses + [total_loss])
+    for l in losses + [total_loss]:
+        tf.summary.scalar(l.op.name + ' (raw)', l)
+        tf.summary.scalar(l.op.name, loss_averages.average(l))
+    with tf.control_dependencies([loss_averages_op]):
+        total_loss = tf.identity(total_loss)
     return total_loss
 
 
-def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id, requested_step=None):
-    """Run Eval once.
-    Args:
-    saver: Saver.
-    summary_writer: Summary writer.
-    top_k_op: Top K op.
-    summary_op: Summary op.
-    """
+def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval):
     _loss = eval_loss(logits, labels)
     top1 = tf.nn.in_top_k(logits, labels, 1)
     top2 = tf.nn.in_top_k(logits, labels, 2)
 
     with tf.Session() as sess:
-        checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, run_id)
+        checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, FLAGS.run_id)
 
-        model_checkpoint_path, global_step = get_checkpoint(checkpoint_path, requested_step, FLAGS.checkpoint)
+        model_checkpoint_path, global_step = get_checkpoint(checkpoint_path)
         global_step = int(global_step)
         saver.restore(sess, model_checkpoint_path)
 
@@ -152,46 +118,35 @@ def eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_i
         coord.join(threads, stop_grace_period_secs=10)
 
 
-def evaluate(run_dir, run_id):
+def evaluate(run_dir):
     with tf.Graph().as_default() as g:
         input_file = os.path.join(FLAGS.train_dir, 'md.json')
         print(input_file)
         with open(input_file, 'r') as f:
             md = json.load(f)
 
-        eval_data = FLAGS.eval_data == 'valid'
+        eval_data = FLAGS.eval_data == 'test'
         num_eval = md['%s_counts' % FLAGS.eval_data]
 
         with tf.device(FLAGS.device_id):
             print('Executing on %s' % FLAGS.device_id)
-            images, labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size, train=not eval_data,
+            images, labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size, mode=eval_data,
                                        num_preprocess_threads=FLAGS.num_preprocess_threads)
-            logits = inference(images, md['nlabels'], 1)
+            logits = inference(images, md['nlabels'], 1, reuse=False)
             summary_op = tf.summary.merge_all()
 
             summary_writer = tf.summary.FileWriter(run_dir, g)
             saver = tf.train.Saver()
 
-            if FLAGS.requested_step_seq:
-                sequence = FLAGS.requested_step_seq.split(',')
-                for requested_step in sequence:
-                    print('Running %s' % sequence)
-                    eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id, requested_step)
-            else:
-                while True:
-                    print('Running loop')
-                    eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id)
-                    if FLAGS.run_once:
-                        break
-                    time.sleep(FLAGS.eval_interval_secs)
+            eval_once(saver, summary_writer, summary_op, logits, labels, num_eval)
 
 
 def main(argv=None):  # pylint: disable=unused-argument
-    run_dir = '%s/run-%d/valid1' % (FLAGS.train_dir, FLAGS.run_id)
+    run_dir = '%s/run-%d/eval' % (FLAGS.train_dir, FLAGS.run_id)
     if tf.gfile.Exists(run_dir):
         tf.gfile.DeleteRecursively(run_dir)
     tf.gfile.MakeDirs(run_dir)
-    evaluate(run_dir, FLAGS.run_id)
+    evaluate(run_dir)
 
 if __name__ == '__main__':
     tf.app.run()

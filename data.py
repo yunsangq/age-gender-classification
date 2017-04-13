@@ -89,7 +89,7 @@ def data_normalization(image):
     return image
 
 
-def image_preprocessing(image_buffer, image_size, train, thread_id=0):
+def image_preprocessing(image_buffer, image_size, mode, thread_id=0):
     """Decode and preprocess one image for evaluation or training.
     Args:
     image_buffer: JPEG encoded string Tensor
@@ -103,7 +103,7 @@ def image_preprocessing(image_buffer, image_size, train, thread_id=0):
 
     image = decode_jpeg(image_buffer)
 
-    if train:
+    if mode == 'train':
         image = distort_image(image, image_size, image_size)
     else:
         image = eval_image(image, image_size, image_size)
@@ -136,17 +136,23 @@ def parse_example_proto(example_serialized):
     return features['image/encoded'], label, features['image/filename']
 
 
-def batch_inputs(data_dir, batch_size, image_size, train, num_preprocess_threads=4,
+def batch_inputs(data_dir, batch_size, image_size, mode, num_preprocess_threads=4,
                  num_readers=1, input_queue_memory_factor=16):
     with tf.name_scope('batch_processing'):
 
-        if train:
+        if mode == 'train':
             files = data_files(data_dir, 'train')
             filename_queue = tf.train.string_input_producer(files,
                                                             shuffle=True,
                                                             capacity=16)
-        else:
+        elif mode == 'valid':
             files = data_files(data_dir, 'validation')
+            filename_queue = tf.train.string_input_producer(files,
+                                                            shuffle=False,
+                                                            capacity=1)
+
+        else:
+            files = data_files(data_dir, 'test')
             filename_queue = tf.train.string_input_producer(files,
                                                             shuffle=False,
                                                             capacity=1)
@@ -165,11 +171,16 @@ def batch_inputs(data_dir, batch_size, image_size, train, num_preprocess_threads
         # The default input_queue_memory_factor is 16 implying a shuffling queue
         # size: examples_per_shard * 16 * 1MB = 17.6GB
         min_queue_examples = examples_per_shard * input_queue_memory_factor
-        if train:
+        if mode == 'train':
             examples_queue = tf.RandomShuffleQueue(
                 capacity=min_queue_examples + 3 * batch_size,
                 min_after_dequeue=min_queue_examples,
                 dtypes=[tf.string])
+        elif mode == 'valid':
+            examples_queue = tf.FIFOQueue(
+                capacity=examples_per_shard + 3 * batch_size,
+                dtypes=[tf.string])
+
         else:
             examples_queue = tf.FIFOQueue(
                 capacity=examples_per_shard + 3 * batch_size,
@@ -195,7 +206,7 @@ def batch_inputs(data_dir, batch_size, image_size, train, num_preprocess_threads
             # Parse a serialized Example proto to extract the image and metadata.
             image_buffer, label_index, fname = parse_example_proto(example_serialized)
 
-            image = image_preprocessing(image_buffer, image_size, train, thread_id)
+            image = image_preprocessing(image_buffer, image_size, mode, thread_id)
             images_labels_fnames.append([image, label_index, fname])
 
         images, label_index_batch, fnames = tf.train.batch_join(
@@ -212,21 +223,21 @@ def batch_inputs(data_dir, batch_size, image_size, train, num_preprocess_threads
         return images, tf.reshape(label_index_batch, [batch_size]), fnames
 
 
-def inputs(data_dir, batch_size=128, image_size=227, train=False, num_preprocess_threads=4):
+def inputs(data_dir, batch_size, image_size, mode, num_preprocess_threads=4):
     with tf.device('/cpu:0'):
         images, labels, filenames = batch_inputs(
-            data_dir, batch_size, image_size, train,
+            data_dir, batch_size, image_size, mode,
             num_preprocess_threads=num_preprocess_threads,
             num_readers=1)
     return images, labels, filenames
 
 
-def distorted_inputs(data_dir, batch_size=128, image_size=227, num_preprocess_threads=4):
+def distorted_inputs(data_dir, batch_size, image_size, mode='train', num_preprocess_threads=4):
     # Force all input processing onto CPU in order to reserve the GPU for
     # the forward inference and back-propagation.
     with tf.device('/cpu:0'):
         images, labels, filenames = batch_inputs(
-            data_dir, batch_size, image_size, train=True,
+            data_dir, batch_size, image_size, mode,
             num_preprocess_threads=num_preprocess_threads,
             num_readers=1)
     return images, labels, filenames
