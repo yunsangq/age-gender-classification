@@ -1,35 +1,16 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import os
 import tensorflow as tf
-
-
-def get_checkpoint(checkpoint_path, requested_step=None, basename='checkpoint'):
-    if requested_step is not None:
-
-        model_checkpoint_path = '%s/%s-%s' % (checkpoint_path, basename, requested_step)
-        if os.path.exists(model_checkpoint_path) is None:
-            print('No checkpoint file found at [%s]' % checkpoint_path)
-            exit(-1)
-            print(model_checkpoint_path)
-        print(model_checkpoint_path)
-        return model_checkpoint_path, requested_step
-
-    ckpt = tf.train.get_checkpoint_state(checkpoint_path)
-    if ckpt and ckpt.model_checkpoint_path:
-        # Restore checkpoint as described in top of this program
-        print(ckpt.model_checkpoint_path)
-        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-
-        return ckpt.model_checkpoint_path, global_step
-    else:
-        print('No checkpoint file found at [%s]' % checkpoint_path)
-        exit(-1)
+import numpy as np
 
 
 def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializer(), is_fc_layer=False):
+    '''
+    :param name: A string. The name of the new variable
+    :param shape: A list of dimensions
+    :param initializer: User Xavier as default.
+    :param is_fc_layer: Want to create fc layer variable? May use different weight_decay for fc
+    layers.
+    :return: The created variable
+    '''
     weight_decay = 0.0005
 
     if is_fc_layer is True:
@@ -43,6 +24,11 @@ def create_variables(name, shape, initializer=tf.contrib.layers.xavier_initializ
 
 
 def output_layer(input_layer, num_labels):
+    '''
+    :param input_layer: 2D tensor
+    :param num_labels: int. How many output labels in total?
+    :return: output layer Y = WX + B
+    '''
     input_dim = input_layer.get_shape().as_list()[-1]
     fc_w = create_variables(name='fc_weights', shape=[input_dim, num_labels], is_fc_layer=True,
                             initializer=tf.random_normal_initializer(stddev=0.01))
@@ -65,6 +51,13 @@ def fc_layer(input_layer, keep_prob, output_channel):
 
 
 def conv_relu_layer(input_layer, filter_shape, stride, padding):
+    '''
+    A helper function to conv, batch normalize and relu the input tensor sequentially
+    :param input_layer: 4D tensor
+    :param filter_shape: list. [filter_height, filter_width, filter_depth, filter_number]
+    :param stride: stride size for conv
+    :return: 4D tensor. Y = Relu(batch_normalize(conv(X)))
+    '''
     out_channel = filter_shape[-1]
     w = create_variables(name='weights', shape=filter_shape,
                          initializer=tf.random_normal_initializer(stddev=0.01))
@@ -83,6 +76,14 @@ def conv_relu_layer(input_layer, filter_shape, stride, padding):
 
 
 def inference(input_tensor_batch, nlabels, keep_prob, reuse):
+    '''
+    :param input_tensor_batch: 4D tensor
+    :param n: num_residual_blocks
+    :param reuse: To build train graph, reuse=False. To build validation graph and share weights
+    with train graph, resue=True
+    :return: last layer in the network. Not softmax-ed
+    '''
+
     layers = []
     with tf.variable_scope('conv1', reuse=reuse):
         conv1 = conv_relu_layer(input_tensor_batch, [7, 7, 3, 96], 4, 'VALID')
@@ -113,3 +114,15 @@ def inference(input_tensor_batch, nlabels, keep_prob, reuse):
         layers.append(fc)
 
     return layers[-1]
+
+
+def test_graph(train_dir='logs'):
+    input_tensor = tf.constant(np.ones([128, 227, 227, 3]), dtype=tf.float32)
+    result = inference(input_tensor, 8, 0.5, reuse=False)
+    result1 = inference(input_tensor, 8, 1, reuse=True)
+    init = tf.global_variables_initializer()
+    sess = tf.Session()
+    sess.run(init)
+    summary_writer = tf.summary.FileWriter(train_dir, sess.graph)
+
+test_graph()

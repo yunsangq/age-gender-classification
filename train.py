@@ -38,7 +38,7 @@ tf.app.flags.DEFINE_float('eta', 0.002,
 tf.app.flags.DEFINE_float('pdrop', 0.5,
                           'Dropout probability')
 
-tf.app.flags.DEFINE_integer('max_steps', 20000,
+tf.app.flags.DEFINE_integer('max_steps', 30000,
                             'Number of iterations')
 
 tf.app.flags.DEFINE_integer('epochs', -1,
@@ -72,8 +72,8 @@ class Train(object):
         val_images, val_labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size, train=not eval_data,
                                            num_preprocess_threads=FLAGS.num_preprocess_threads)
 
-        logits = inference(images, self.md['nlabels'], self.pdrop)
-        val_logits = inference(val_images, self.md['nlabels'], self.pdrop)
+        logits = inference(images, self.md['nlabels'], self.pdrop, reuse=False)
+        val_logits = inference(val_images, self.md['nlabels'], self.pdrop, reuse=True)
 
         self.total_loss = self.loss(logits, labels)
         self.train_op = self.optimizer(FLAGS.optim, FLAGS.eta, self.total_loss)
@@ -188,42 +188,67 @@ class Train(object):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
             logits=logits, labels=labels, name='val_cross_entropy_per_example')
         cross_entropy_mean = tf.reduce_mean(cross_entropy, name='val_cross_entropy')
+        tf.add_to_collection('val_losses', cross_entropy_mean)
+        losses = tf.get_collection('val_losses')
         regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
+        tf.summary.scalar('tl (raw)', total_loss)
+        # total_loss = tf.add_n(losses + regularization_losses, name='total_loss')
+        loss_averages = tf.train.ExponentialMovingAverage(0.9, name='val_avg')
+        loss_averages_op = loss_averages.apply(losses + [total_loss])
+        for l in losses + [total_loss]:
+            tf.summary.scalar(l.op.name + ' (raw)', l)
+            tf.summary.scalar(l.op.name, loss_averages.average(l))
+        with tf.control_dependencies([loss_averages_op]):
+            total_loss = tf.identity(total_loss)
         return total_loss
 
     def eval_once(self, sess, global_step, summary_writer, summary_op):
-        num_steps = int(math.ceil(self.num_eval / FLAGS.batch_size))
-        true_count1 = true_count2 = 0
-        total_loss = 0.0
-        total_sample_count = num_steps * FLAGS.batch_size
+        # Start the queue runners.
+        coord = tf.train.Coordinator()
+        threads = []
+        try:
+            for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
+                threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
+                                                 start=True))
+            num_steps = int(math.ceil(self.num_eval / FLAGS.batch_size))
+            true_count1 = true_count2 = 0
+            total_loss = 0.0
+            total_sample_count = num_steps * FLAGS.batch_size
+            step = 0
+            print('Validation')
 
-        print('Validation')
+            while step < num_steps and not coord.should_stop():
+                predictions1, predictions2, loss_value = sess.run([self.top1,
+                                                                   self.top2,
+                                                                   self.val_total_loss],
+                                                                  {self.pdrop: 1})
+                true_count1 += np.sum(predictions1)
+                true_count2 += np.sum(predictions2)
+                total_loss += loss_value
 
-        for step in xrange(num_steps):
-            predictions1, predictions2, loss_value = sess.run([self.top1,
-                                                               self.top2,
-                                                               self.val_total_loss],
-                                                              {self.pdrop: 1})
-            true_count1 += np.sum(predictions1)
-            true_count2 += np.sum(predictions2)
-            total_loss += loss_value
+                step += 1
 
-        # Compute precision @ 1.
+            # Compute precision @ 1.
 
-        precision1 = true_count1 / total_sample_count
-        precision2 = true_count2 / total_sample_count
-        total_loss /= num_steps
-        print('step%d: loss = %.3f' % (global_step, total_loss))
-        print('step%d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
-        print('step%d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
+            precision1 = true_count1 / total_sample_count
+            precision2 = true_count2 / total_sample_count
+            total_loss /= num_steps
+            print('step%d: loss = %.3f' % (global_step, total_loss))
+            print('step%d: precision @ 1 = %.3f (%d/%d)' % (global_step, precision1, true_count1, total_sample_count))
+            print('step%d: precision @ 2 = %.3f (%d/%d)' % (global_step, precision2, true_count2, total_sample_count))
 
-        summary = tf.Summary()
-        summary.ParseFromString(sess.run(summary_op, {self.pdrop: 1}))
-        summary.value.add(tag='Precision @ 1', simple_value=precision1)
-        summary.value.add(tag='Precision @ 2', simple_value=precision2)
-        summary.value.add(tag='cost', simple_value=total_loss)
-        summary_writer.add_summary(summary, global_step)
+            summary = tf.Summary()
+            summary.ParseFromString(sess.run(summary_op, {self.pdrop: 1}))
+            summary.value.add(tag='Precision @ 1', simple_value=precision1)
+            summary.value.add(tag='Precision @ 2', simple_value=precision2)
+            summary.value.add(tag='cost', simple_value=total_loss)
+            summary_writer.add_summary(summary, global_step)
+        except Exception as e:  # pylint: disable=broad-except
+            coord.request_stop(e)
+
+        coord.request_stop()
+        coord.join(threads, stop_grace_period_secs=10)
 
 
 if __name__ == '__main__':

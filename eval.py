@@ -31,14 +31,14 @@ import time
 from data import inputs
 import numpy as np
 import tensorflow as tf
-from model import select_model, get_checkpoint
+from model import *
 import os
 import json
 
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 13537,
+tf.app.flags.DEFINE_integer('run_id', 21571,
                             'This is the run number (pid) for training proc')
 
 tf.app.flags.DEFINE_string('device_id', '/cpu:0',
@@ -162,30 +162,25 @@ def evaluate(run_dir, run_id):
         eval_data = FLAGS.eval_data == 'valid'
         num_eval = md['%s_counts' % FLAGS.eval_data]
 
-        model_fn = select_model(FLAGS.model_type)
-
         with tf.device(FLAGS.device_id):
             print('Executing on %s' % FLAGS.device_id)
             images, labels, _ = inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size, train=not eval_data,
                                        num_preprocess_threads=FLAGS.num_preprocess_threads)
-            logits = model_fn(md['nlabels'], images, 1, False)
+            logits = inference(images, md['nlabels'], 1)
             summary_op = tf.summary.merge_all()
 
             summary_writer = tf.summary.FileWriter(run_dir, g)
             saver = tf.train.Saver()
 
-            for requested_step in range(6000, 10000, 1000):
-                print('Running %s' % requested_step)
-                eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, requested_step)
             if FLAGS.requested_step_seq:
                 sequence = FLAGS.requested_step_seq.split(',')
                 for requested_step in sequence:
                     print('Running %s' % sequence)
-                    eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, requested_step)
+                    eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id, requested_step)
             else:
                 while True:
                     print('Running loop')
-                    eval_once(saver, summary_writer, summary_op, logits, labels, num_eval)
+                    eval_once(saver, summary_writer, summary_op, logits, labels, num_eval, run_id)
                     if FLAGS.run_once:
                         break
                     time.sleep(FLAGS.eval_interval_secs)
