@@ -4,3 +4,4 @@ Folds/
 tmp/
 logs/
 tmp1/
+*.pyc

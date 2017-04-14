@@ -19,9 +19,6 @@ tf.app.flags.DEFINE_integer('run_id', 19813,
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('eval_dir', './Folds/tf/gender_eval_test_fold_is_0',
-                           'Directory to put output to')
-
 tf.app.flags.DEFINE_string('eval_data', 'test',
                            'Data type (valid|test)')
 
@@ -33,9 +30,6 @@ tf.app.flags.DEFINE_integer('image_size', 227,
 
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             'Batch size')
-
-tf.app.flags.DEFINE_string('checkpoint', 'checkpoint',
-                           'Checkpoint basename')
 
 FLAGS = tf.app.flags.FLAGS
 

@@ -34,9 +34,6 @@ tf.app.flags.DEFINE_string('filename', './example_image5.jpg',
 tf.app.flags.DEFINE_string('target', '',
                            'CSV file containing the filename processed along with best guess and score')
 
-tf.app.flags.DEFINE_string('checkpoint', 'checkpoint',
-                           'Checkpoint basename')
-
 tf.app.flags.DEFINE_boolean('single_look', False, 'single look at the image or multiple crops')
 
 tf.app.flags.DEFINE_string('face_detection_model', '', 'Do frontal face detection with model specified')
