@@ -5,7 +5,8 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 from model import inference, get_checkpoint
-from utils import ImageCoder, make_batch, FaceDetector
+from utils import ImageCoder, make_batch
+from detect import face_detection_model
 import os
 import csv
 
@@ -36,7 +37,9 @@ tf.app.flags.DEFINE_string('target', '',
 
 tf.app.flags.DEFINE_boolean('single_look', False, 'single look at the image or multiple crops')
 
-tf.app.flags.DEFINE_string('face_detection_model', '', 'Do frontal face detection with model specified')
+tf.app.flags.DEFINE_string('face_detection_model', '/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml', 'Do frontal face detection with model specified')
+
+tf.app.flags.DEFINE_string('face_detection_type', 'cascade', 'Face detection model type (yolo_tiny|cascade)')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -98,6 +101,15 @@ def main(argv=None):  # pylint: disable=unused-argument
         tf.gfile.DeleteRecursively(run_dir)
     tf.gfile.MakeDirs(run_dir)
 
+    files = []
+
+    if FLAGS.face_detection_model:
+        print('Using face detector (%s) %s' % (FLAGS.face_detection_type, FLAGS.face_detection_model))
+        face_detect = face_detection_model(FLAGS.face_detection_type, FLAGS.face_detection_model)
+        face_files, rectangles = face_detect.run(FLAGS.filename)
+        print(face_files)
+        files += face_files
+
     with tf.Session() as sess:
         label_list = AGE_LIST if FLAGS.class_type == 'age' else GENDER_LIST
         nlabels = len(label_list)
@@ -116,14 +128,6 @@ def main(argv=None):  # pylint: disable=unused-argument
         softmax_output = tf.nn.softmax(logits)
 
         coder = ImageCoder()
-
-        files = []
-
-        if FLAGS.face_detection_model:
-            print('Using face detector %s' % FLAGS.face_detection_model)
-            face_detect = FaceDetector(FLAGS.face_detection_model)
-            face_files, rectangles = face_detect.run(FLAGS.filename)
-            files += face_files
 
         # Support a batch mode if no face detection model
         if len(files) == 0:
