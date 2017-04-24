@@ -29,7 +29,7 @@ tf.app.flags.DEFINE_string('class_type', 'age',
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('filename', './example_image5.jpg',
+tf.app.flags.DEFINE_string('filename', './example_image1.jpg',
                            'File (Image) or File list (Text/No header TSV) to process')
 
 tf.app.flags.DEFINE_string('target', '',
