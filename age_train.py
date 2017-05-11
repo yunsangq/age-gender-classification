@@ -8,7 +8,8 @@ import os
 import numpy as np
 import tensorflow as tf
 from data import distorted_inputs, inputs
-from model import inference
+# from model import inference
+from res_model import inference
 import json
 import math
 
@@ -29,7 +30,7 @@ tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
 tf.app.flags.DEFINE_string('optim', 'Momentum',
                            'Optimizer')
 
-tf.app.flags.DEFINE_integer('image_size', 227,
+tf.app.flags.DEFINE_integer('image_size', 224,
                             'Image size')
 
 tf.app.flags.DEFINE_float('eta', 0.002,

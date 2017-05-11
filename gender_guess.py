@@ -14,7 +14,7 @@ RESIZE_FINAL = 227
 GENDER_LIST = ['M', 'F']
 AGE_LIST = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '(48, 53)', '(60, 100)']
 
-tf.app.flags.DEFINE_string('model_dir', './Folds/tf/gender_test_fold_is_0/run-19813/train',
+tf.app.flags.DEFINE_string('model_dir', './Folds/tf/gender_test_fold_is_0/run-19669/train',
                            'Model directory (where training data lives)')
 
 tf.app.flags.DEFINE_string('class_type', 'gender',
@@ -23,7 +23,7 @@ tf.app.flags.DEFINE_string('class_type', 'gender',
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
                            'What processing unit to execute inference on')
 
-tf.app.flags.DEFINE_string('filename', './example_image1.jpg',
+tf.app.flags.DEFINE_string('filename', './example/example_image17.jpg',
                            'File (Image) or File list (Text/No header TSV) to process')
 
 tf.app.flags.DEFINE_string('target', '',
@@ -31,7 +31,7 @@ tf.app.flags.DEFINE_string('target', '',
 
 tf.app.flags.DEFINE_boolean('single_look', False, 'single look at the image or multiple crops')
 
-tf.app.flags.DEFINE_string('face_detection_model', '/usr/share/opencv/haarcascades/haarcascade_frontalface_default.xml', 'Do frontal face detection with model specified')
+tf.app.flags.DEFINE_string('face_detection_model', '/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml', 'Do frontal face detection with model specified')
 
 tf.app.flags.DEFINE_string('face_detection_type', 'cascade', 'Face detection model type (yolo_tiny|cascade)')
 
