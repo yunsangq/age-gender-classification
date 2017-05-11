@@ -108,13 +108,13 @@ def inference(input_tensor_batch, nlabels, keep_prob, reuse):
     layers = []
     with tf.variable_scope('conv1', reuse=reuse):
         input_data = tf.pad(input_tensor_batch, [[0, 0], [3, 3], [3, 3], [0, 0]])
-        conv1 = conv_bn_relu_layer(input_data, [7, 7, 3, 64], 2, 'VALID', name='conv')
+        conv1 = bn_relu_conv_layer(input_data, [7, 7, 3, 64], 2, 'VALID', name='conv')
         pool = tf.nn.max_pool(conv1,
                               ksize=[1, 3, 3, 1],
                               strides=[1, 2, 2, 1], padding='SAME')
         layers.append(pool)
 
-    ''' 34-layer pre-activation '''
+    ''' 34-layer pre-activation
     with tf.variable_scope('conv2_1', reuse=reuse):
         branch2a = bn_relu_conv_layer(layers[-1], [3, 3, 64, 64], 1, 'SAME', name='branch2a')
         branch2b = bn_relu_conv_layer(branch2a, [3, 3, 64, 64], 1, 'SAME', name='branch2b')
@@ -234,9 +234,9 @@ def inference(input_tensor_batch, nlabels, keep_prob, reuse):
 
         res5c = tf.add(layers[-1], branch2b)
         layers.append(res5c)
+    '''
 
-
-    ''' 18-layer pre-activation
+    ''' 18-layer pre-activation '''
     with tf.variable_scope('conv2_1', reuse=reuse):
         branch2a = bn_relu_conv_layer(layers[-1], [3, 3, 64, 64], 1, 'SAME', name='branch2a')
         branch2b = bn_relu_conv_layer(branch2a, [3, 3, 64, 64], 1, 'SAME', name='branch2b')
@@ -300,7 +300,7 @@ def inference(input_tensor_batch, nlabels, keep_prob, reuse):
 
         res5b = tf.add(layers[-1], branch2b)
         layers.append(res5b)
-    '''
+
 
     ''' 18-layer
     with tf.variable_scope('conv2_1', reuse=reuse):

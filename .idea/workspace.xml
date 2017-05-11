@@ -2,32 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="015dfe06-d621-4aad-a9b9-c7d6a83b6317" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/res_model.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/frontal-face-1.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/frontal-face.jpg" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image1.jpg" afterPath="$PROJECT_DIR$/example/example_image1.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image10.jpg" afterPath="$PROJECT_DIR$/example/example_image10.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image11.jpg" afterPath="$PROJECT_DIR$/example/example_image11.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image12.jpg" afterPath="$PROJECT_DIR$/example/example_image12.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image13.jpg" afterPath="$PROJECT_DIR$/example/example_image13.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image14.jpg" afterPath="$PROJECT_DIR$/example/example_image14.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image15.jpg" afterPath="$PROJECT_DIR$/example/example_image15.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image16.jpg" afterPath="$PROJECT_DIR$/example/example_image16.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image17.jpg" afterPath="$PROJECT_DIR$/example/example_image17.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image2.jpg" afterPath="$PROJECT_DIR$/example/example_image2.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image3.jpg" afterPath="$PROJECT_DIR$/example/example_image3.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image4.jpg" afterPath="$PROJECT_DIR$/example/example_image4.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image5.jpg" afterPath="$PROJECT_DIR$/example/example_image5.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image6.jpg" afterPath="$PROJECT_DIR$/example/example_image6.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image7.jpg" afterPath="$PROJECT_DIR$/example/example_image7.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image8.jpg" afterPath="$PROJECT_DIR$/example/example_image8.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/example_image9.jpg" afterPath="$PROJECT_DIR$/example/example_image9.jpg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/age_eval.py" afterPath="$PROJECT_DIR$/age_eval.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/age_guess.py" afterPath="$PROJECT_DIR$/age_guess.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/age_train.py" afterPath="$PROJECT_DIR$/age_train.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gender_eval.py" afterPath="$PROJECT_DIR$/gender_eval.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gender_guess.py" afterPath="$PROJECT_DIR$/gender_guess.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/res_model.py" afterPath="$PROJECT_DIR$/res_model.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -45,10 +21,10 @@
       <file leaf-file-name="res_model.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/res_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1690">
-              <caret line="235" column="28" lean-forward="true" selection-start-line="235" selection-start-column="28" selection-end-line="235" selection-end-column="28" />
+            <state relative-caret-position="3">
+              <caret line="104" column="0" lean-forward="false" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
               <folding>
-                <element signature="e#10414#13348#1" expanded="false" />
+                <element signature="e#4937#10411#1" expanded="false" />
                 <element signature="e#13354#16565#1" expanded="false" />
                 <element signature="e#16571#24164#1" expanded="false" />
               </folding>
@@ -59,8 +35,8 @@
       <file leaf-file-name="model.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="275">
-              <caret line="67" column="46" lean-forward="false" selection-start-line="67" selection-start-column="46" selection-end-line="67" selection-end-column="46" />
+            <state relative-caret-position="740">
+              <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -69,8 +45,8 @@
       <file leaf-file-name="age_train.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/age_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="185">
-              <caret line="33" column="41" lean-forward="false" selection-start-line="33" selection-start-column="41" selection-end-line="33" selection-end-column="41" />
+            <state relative-caret-position="143">
+              <caret line="29" column="47" lean-forward="false" selection-start-line="29" selection-start-column="47" selection-end-line="29" selection-end-column="47" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
               </folding>
@@ -91,9 +67,11 @@
       <file leaf-file-name="age_eval.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/age_eval.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="16" column="41" lean-forward="false" selection-start-line="16" selection-start-column="41" selection-end-line="16" selection-end-column="41" />
-              <folding />
+            <state relative-caret-position="240">
+              <caret line="30" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#38#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -165,8 +143,8 @@
         <option value="$PROJECT_DIR$/gender_eval.py" />
         <option value="$PROJECT_DIR$/gender_guess.py" />
         <option value="$PROJECT_DIR$/age_guess.py" />
-        <option value="$PROJECT_DIR$/age_eval.py" />
         <option value="$PROJECT_DIR$/age_train.py" />
+        <option value="$PROJECT_DIR$/age_eval.py" />
         <option value="$PROJECT_DIR$/res_model.py" />
       </list>
     </option>
@@ -493,9 +471,9 @@
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.age_train" />
-        <item index="1" class="java.lang.String" itemvalue="Python.res_model" />
-        <item index="2" class="java.lang.String" itemvalue="Python.model" />
-        <item index="3" class="java.lang.String" itemvalue="Python.age_eval" />
+        <item index="1" class="java.lang.String" itemvalue="Python.age_eval" />
+        <item index="2" class="java.lang.String" itemvalue="Python.res_model" />
+        <item index="3" class="java.lang.String" itemvalue="Python.model" />
         <item index="4" class="java.lang.String" itemvalue="Python.age_guess" />
       </list>
     </recent_temporary>
@@ -539,7 +517,7 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14986522" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.54132605" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" x="2291" y="333" width="1242" height="758" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.43778384" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" x="2291" y="333" width="1242" height="758" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -568,7 +546,7 @@
           <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="59" />
+      <option name="time" value="60" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -783,14 +761,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/age_guess.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="31" column="64" lean-forward="false" selection-start-line="31" selection-start-column="64" selection-end-line="31" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-3825">
@@ -807,14 +777,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/age_eval.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="16" column="41" lean-forward="false" selection-start-line="16" selection-start-column="41" selection-end-line="16" selection-end-column="41" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/testmodel.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1685">
@@ -823,18 +785,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/age_eval.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="30" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/age_guess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="31" column="64" lean-forward="false" selection-start-line="31" selection-start-column="64" selection-end-line="31" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="275">
-          <caret line="67" column="46" lean-forward="false" selection-start-line="67" selection-start-column="46" selection-end-line="67" selection-end-column="46" />
+        <state relative-caret-position="740">
+          <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/age_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="185">
-          <caret line="33" column="41" lean-forward="false" selection-start-line="33" selection-start-column="41" selection-end-line="33" selection-end-column="41" />
+        <state relative-caret-position="143">
+          <caret line="29" column="47" lean-forward="false" selection-start-line="29" selection-start-column="47" selection-end-line="29" selection-end-column="47" />
           <folding>
             <element signature="e#0#38#0" expanded="true" />
           </folding>
@@ -843,10 +823,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/res_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1690">
-          <caret line="235" column="28" lean-forward="true" selection-start-line="235" selection-start-column="28" selection-end-line="235" selection-end-column="28" />
+        <state relative-caret-position="3">
+          <caret line="104" column="0" lean-forward="false" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
           <folding>
-            <element signature="e#10414#13348#1" expanded="false" />
+            <element signature="e#4937#10411#1" expanded="false" />
             <element signature="e#13354#16565#1" expanded="false" />
             <element signature="e#16571#24164#1" expanded="false" />
           </folding>

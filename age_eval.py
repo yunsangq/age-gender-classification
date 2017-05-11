@@ -6,14 +6,15 @@ import math
 from data import inputs
 import numpy as np
 import tensorflow as tf
-from model import inference, get_checkpoint
+# from model import inference, get_checkpoint
+from res_model import inference, get_checkpoint
 import os
 import json
 
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 23874,
+tf.app.flags.DEFINE_integer('run_id', 22312,
                             'This is the run number (pid) for training proc')
 
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',
@@ -25,7 +26,7 @@ tf.app.flags.DEFINE_string('eval_data', 'test',
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 4,
                             'Number of preprocessing threads')
 
-tf.app.flags.DEFINE_integer('image_size', 227,
+tf.app.flags.DEFINE_integer('image_size', 224,
                             'Image size')
 
 tf.app.flags.DEFINE_integer('batch_size', 128,
