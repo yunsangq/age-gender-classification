@@ -104,11 +104,20 @@ def conv_bn_layer(input_layer, filter_shape, stride, padding, name):
     return bn
 
 
+def conv_layer(input_layer, filter_shape, stride, padding, name):
+    with tf.variable_scope(name):
+        w = create_variables(name='weights', shape=filter_shape,
+                             initializer=tf.random_normal_initializer(stddev=0.01))
+
+        conv_layer = tf.nn.conv2d(input_layer, w, strides=[1, stride, stride, 1], padding=padding)
+    return conv_layer
+
+
 def inference(input_tensor_batch, nlabels, keep_prob, reuse):
     layers = []
     with tf.variable_scope('conv1', reuse=reuse):
         input_data = tf.pad(input_tensor_batch, [[0, 0], [3, 3], [3, 3], [0, 0]])
-        conv1 = bn_relu_conv_layer(input_data, [7, 7, 3, 64], 2, 'VALID', name='conv')
+        conv1 = conv_layer(input_data, [7, 7, 3, 64], 2, 'VALID', name='conv')
         pool = tf.nn.max_pool(conv1,
                               ksize=[1, 3, 3, 1],
                               strides=[1, 2, 2, 1], padding='SAME')
@@ -300,7 +309,6 @@ def inference(input_tensor_batch, nlabels, keep_prob, reuse):
 
         res5b = tf.add(layers[-1], branch2b)
         layers.append(res5b)
-
 
     ''' 18-layer
     with tf.variable_scope('conv2_1', reuse=reuse):
