@@ -185,19 +185,7 @@ class Train(object):
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
             logits=logits, labels=labels, name='val_cross_entropy_per_example')
         cross_entropy_mean = tf.reduce_mean(cross_entropy, name='val_cross_entropy')
-        tf.add_to_collection('val_losses', cross_entropy_mean)
-        losses = tf.get_collection('val_losses')
-        regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-        total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
-        tf.summary.scalar('tl (raw)', total_loss)
-        loss_averages = tf.train.ExponentialMovingAverage(0.9, name='val_avg')
-        loss_averages_op = loss_averages.apply(losses + [total_loss])
-        for l in losses + [total_loss]:
-            tf.summary.scalar(l.op.name + ' (raw)', l)
-            tf.summary.scalar(l.op.name, loss_averages.average(l))
-        with tf.control_dependencies([loss_averages_op]):
-            total_loss = tf.identity(total_loss)
-        return total_loss
+        return cross_entropy_mean
 
     def eval_once(self, sess, global_step, summary_writer, summary_op):
         # Start the queue runners.

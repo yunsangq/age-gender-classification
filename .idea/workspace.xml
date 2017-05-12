@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="015dfe06-d621-4aad-a9b9-c7d6a83b6317" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/res_model.py" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/age_eval.py" afterPath="$PROJECT_DIR$/age_eval.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/age_train.py" afterPath="$PROJECT_DIR$/age_train.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gender_eval.py" afterPath="$PROJECT_DIR$/gender_eval.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/gender_train.py" afterPath="$PROJECT_DIR$/gender_train.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,21 +20,11 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="model.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/model.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1000">
-              <caret line="55" column="0" lean-forward="false" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="age_train.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="age_train.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/age_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4200">
-              <caret line="210" column="61" lean-forward="true" selection-start-line="210" selection-start-column="61" selection-end-line="210" selection-end-column="61" />
+            <state relative-caret-position="300">
+              <caret line="183" column="40" lean-forward="true" selection-start-line="183" selection-start-column="40" selection-end-line="183" selection-end-column="40" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
               </folding>
@@ -43,32 +35,9 @@
       <file leaf-file-name="gender_train.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gender_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="440">
-              <caret line="199" column="25" lean-forward="false" selection-start-line="199" selection-start-column="25" selection-end-line="199" selection-end-column="25" />
-              <folding>
-                <marker date="1494562416589" expanded="true" signature="8805:8948" ph="..." />
-                <marker date="1494562416589" expanded="true" signature="9258:9586" ph="..." />
-                <marker date="1494562416589" expanded="true" signature="9312:9395" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="gender_eval.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/gender_eval.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="46" column="0" lean-forward="false" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
-              <folding>
-                <marker date="1494562413149" expanded="true" signature="1137:1572" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="1655:3481" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="2062:3315" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="2127:2262" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="2554:2736" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="3506:4238" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="3537:4238" ph="..." />
-                <marker date="1494562413149" expanded="true" signature="4261:4491" ph="..." />
-              </folding>
+            <state relative-caret-position="200">
+              <caret line="187" column="33" lean-forward="false" selection-start-line="187" selection-start-column="33" selection-end-line="187" selection-end-column="33" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -76,17 +45,22 @@
       <file leaf-file-name="age_eval.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/age_eval.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="100">
-              <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+            <state relative-caret-position="260">
+              <caret line="44" column="29" lean-forward="true" selection-start-line="44" selection-start-column="29" selection-end-line="44" selection-end-column="29" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
-                <marker date="1494562404893" expanded="true" signature="1702:3896" ph="..." />
-                <marker date="1494562404893" expanded="true" signature="2154:3730" ph="..." />
-                <marker date="1494562404893" expanded="true" signature="2219:2354" ph="..." />
-                <marker date="1494562404893" expanded="true" signature="2660:2910" ph="..." />
-                <marker date="1494562404893" expanded="true" signature="3921:4653" ph="..." />
-                <marker date="1494562404893" expanded="true" signature="3952:4653" ph="..." />
-                <marker date="1494562404893" expanded="true" signature="4676:4906" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gender_eval.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/gender_eval.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="43" column="29" lean-forward="false" selection-start-line="43" selection-start-column="29" selection-end-line="43" selection-end-column="29" />
+              <folding>
+                <marker date="1494565430868" expanded="true" signature="1137:1424" ph="..." />
               </folding>
             </state>
           </provider>
@@ -157,12 +131,12 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/gender_guess.py" />
         <option value="$PROJECT_DIR$/age_guess.py" />
-        <option value="$PROJECT_DIR$/age_eval.py" />
-        <option value="$PROJECT_DIR$/gender_train.py" />
-        <option value="$PROJECT_DIR$/gender_eval.py" />
         <option value="$PROJECT_DIR$/tmp.py" />
         <option value="$PROJECT_DIR$/res_model.py" />
         <option value="$PROJECT_DIR$/age_train.py" />
+        <option value="$PROJECT_DIR$/gender_train.py" />
+        <option value="$PROJECT_DIR$/age_eval.py" />
+        <option value="$PROJECT_DIR$/gender_eval.py" />
       </list>
     </option>
   </component>
@@ -213,46 +187,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="Folds" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="age-gender-classification" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="age-gender-classification" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Folds" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tf" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="age-gender-classification" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="age-gender-classification" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Folds" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tf" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="age_test_fold_is_0" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -567,8 +501,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/tmp/model.py" />
-    <entry file="file://$PROJECT_DIR$/tmp/data.py" />
     <entry file="file://$PROJECT_DIR$/tmp/guess.py" />
     <entry file="file://$PROJECT_DIR$/eval.py" />
     <entry file="file://$PROJECT_DIR$/preproc.py" />
@@ -594,13 +526,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-76570">
           <caret line="18" column="67" lean-forward="false" selection-start-line="18" selection-start-column="66" selection-end-line="18" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -703,6 +628,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-26255">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -710,6 +636,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-244595">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -734,80 +661,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/age_guess.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="31" column="64" lean-forward="false" selection-start-line="31" selection-start-column="64" selection-end-line="31" selection-end-column="64" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="31">
-          <caret line="138" column="4" lean-forward="false" selection-start-line="138" selection-start-column="4" selection-end-line="138" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/age_preproc.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2040">
-          <caret line="29" column="45" lean-forward="false" selection-start-line="29" selection-start-column="45" selection-end-line="29" selection-end-column="45" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/tensorflow/python/training/moving_averages.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
           <caret line="295" column="74" lean-forward="true" selection-start-line="294" selection-start-column="16" selection-end-line="295" selection-end-column="74" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gender_train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="199" column="25" lean-forward="false" selection-start-line="199" selection-start-column="25" selection-end-line="199" selection-end-column="25" />
-          <folding>
-            <marker date="1494562416589" expanded="true" signature="8805:8948" ph="..." />
-            <marker date="1494562416589" expanded="true" signature="9258:9586" ph="..." />
-            <marker date="1494562416589" expanded="true" signature="9312:9395" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gender_eval.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="46" column="0" lean-forward="false" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
-          <folding>
-            <marker date="1494562413149" expanded="true" signature="1137:1572" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="1655:3481" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="2062:3315" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="2127:2262" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="2554:2736" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="3506:4238" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="3537:4238" ph="..." />
-            <marker date="1494562413149" expanded="true" signature="4261:4491" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/age_eval.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="100">
-          <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#38#0" expanded="true" />
-            <marker date="1494562404893" expanded="true" signature="1702:3896" ph="..." />
-            <marker date="1494562404893" expanded="true" signature="2154:3730" ph="..." />
-            <marker date="1494562404893" expanded="true" signature="2219:2354" ph="..." />
-            <marker date="1494562404893" expanded="true" signature="2660:2910" ph="..." />
-            <marker date="1494562404893" expanded="true" signature="3921:4653" ph="..." />
-            <marker date="1494562404893" expanded="true" signature="3952:4653" ph="..." />
-            <marker date="1494562404893" expanded="true" signature="4676:4906" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -851,12 +709,88 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="411">
+          <caret line="157" column="42" lean-forward="false" selection-start-line="157" selection-start-column="42" selection-end-line="157" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1891">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Folds/original_txt_files/fold_1_data.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Folds/train_val_txt_files_per_fold/test_fold_is_0/age_train.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/age_preproc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="34" column="59" lean-forward="false" selection-start-line="34" selection-start-column="59" selection-end-line="34" selection-end-column="59" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/age_train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4200">
-          <caret line="210" column="61" lean-forward="true" selection-start-line="210" selection-start-column="61" selection-end-line="210" selection-end-column="61" />
+        <state relative-caret-position="300">
+          <caret line="183" column="40" lean-forward="true" selection-start-line="183" selection-start-column="40" selection-end-line="183" selection-end-column="40" />
           <folding>
             <element signature="e#0#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gender_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="187" column="33" lean-forward="false" selection-start-line="187" selection-start-column="33" selection-end-line="187" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/age_eval.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="44" column="29" lean-forward="true" selection-start-line="44" selection-start-column="29" selection-end-line="44" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#38#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/age_guess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1769">
+          <caret line="31" column="64" lean-forward="false" selection-start-line="31" selection-start-column="64" selection-end-line="31" selection-end-column="64" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gender_eval.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="43" column="29" lean-forward="false" selection-start-line="43" selection-start-column="29" selection-end-line="43" selection-end-column="29" />
+          <folding>
+            <marker date="1494565430868" expanded="true" signature="1137:1424" ph="..." />
           </folding>
         </state>
       </provider>

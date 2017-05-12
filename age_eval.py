@@ -42,9 +42,7 @@ def eval_loss(logits, labels):
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
         logits=logits, labels=labels, name='cross_entropy_per_example')
     cross_entropy_mean = tf.reduce_mean(cross_entropy, name='cross_entropy')
-    regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    total_loss = cross_entropy_mean + LAMBDA * sum(regularization_losses)
-    return total_loss
+    return cross_entropy_mean
 
 
 def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval):
