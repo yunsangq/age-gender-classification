@@ -38,7 +38,7 @@ tf.app.flags.DEFINE_float('eta', 0.002,
 tf.app.flags.DEFINE_float('pdrop', 0.5,
                           'Dropout probability')
 
-tf.app.flags.DEFINE_integer('max_steps', 20000,
+tf.app.flags.DEFINE_integer('max_steps', 100000,
                             'Number of iterations')
 
 tf.app.flags.DEFINE_integer('epochs', -1,
@@ -76,6 +76,8 @@ class Train(object):
 
         self.total_loss = self.loss(logits, labels)
         self.train_op = self.optimizer(FLAGS.optim, FLAGS.eta, self.total_loss)
+        self.train_top1 = tf.nn.in_top_k(logits, labels, 1)
+        self.train_top2 = tf.nn.in_top_k(logits, labels, 2)
 
         self.val_total_loss = self.eval_loss(val_logits, val_labels)
         self.top1 = tf.nn.in_top_k(val_logits, val_labels, 1)
@@ -114,8 +116,11 @@ class Train(object):
             if step == 0:
                 self.eval_once(sess, step, val_writer, summary_op)
 
+            cnt_top1 = cnt_top2 = 0.0
             start_time = time.time()
-            _, loss_value = sess.run([self.train_op, self.total_loss], {self.pdrop: FLAGS.pdrop})
+            _, loss_value, train_top1, train_top2 = sess.run([self.train_op, self.total_loss,
+                                                              self.train_top1, self.train_top2],
+                                                             {self.pdrop: FLAGS.pdrop})
             duration = time.time() - start_time
 
             assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
@@ -131,8 +136,18 @@ class Train(object):
 
             # Loss only actually evaluated every 100 steps?
             if step % 100 == 0:
+                cnt_top1 += np.sum(train_top1)
+                cnt_top2 += np.sum(train_top2)
+                print('Train')
+                print('step%d: loss = %.3f' % (step, loss_value))
+                print('step%d: precision @ 1 = %.3f (%d/%d)' %
+                      (step, cnt_top1/len(train_top1), cnt_top1, len(train_top1)))
+                print('step%d: precision @ 2 = %.3f (%d/%d)' %
+                      (step, cnt_top2/len(train_top2), cnt_top2, len(train_top2)))
                 summary = tf.Summary()
                 summary.ParseFromString(sess.run(summary_op, {self.pdrop: FLAGS.pdrop}))
+                summary.value.add(tag='Precision @ 1', simple_value=cnt_top1/len(train_top1))
+                summary.value.add(tag='Precision @ 2', simple_value=cnt_top2/len(train_top2))
                 summary.value.add(tag='cost', simple_value=loss_value)
                 summary_writer.add_summary(summary, step)
                 if step != 0:
