@@ -17,10 +17,10 @@ AGE_LIST = ['(0, 2)', '(4, 6)', '(8, 12)', '(15, 20)', '(25, 32)', '(38, 43)', '
 tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 6784,
+tf.app.flags.DEFINE_integer('run_id', 7390,
                             'This is the run number (pid) for training proc')
 
-tf.app.flags.DEFINE_string('model_dir', './Folds/tf/age_test_fold_is_0/run-6784/train',
+tf.app.flags.DEFINE_string('model_dir', './Folds/tf/age_test_fold_is_0/run-7390/train',
                            'Model directory (where training data lives)')
 
 tf.app.flags.DEFINE_string('class_type', 'age',

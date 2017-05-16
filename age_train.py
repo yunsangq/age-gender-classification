@@ -38,7 +38,7 @@ tf.app.flags.DEFINE_float('eta', 0.002,
 tf.app.flags.DEFINE_float('pdrop', 0.5,
                           'Dropout probability')
 
-tf.app.flags.DEFINE_integer('max_steps', 100000,
+tf.app.flags.DEFINE_integer('max_steps', 30001,
                             'Number of iterations')
 
 tf.app.flags.DEFINE_integer('epochs', -1,

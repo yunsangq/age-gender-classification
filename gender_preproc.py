@@ -15,13 +15,13 @@ RESIZE_HEIGHT = 256
 RESIZE_WIDTH = 256
 
 tf.app.flags.DEFINE_string('fold_dir',
-                           './Folds/train_val_txt_files_per_fold/test_fold_is_0',
+                           './Folds/train_val_txt_files_per_fold/test_fold_is_4',
                            'Fold directory')
 
 tf.app.flags.DEFINE_string('data_dir', '../models/age-gender/aligned',
                            'Data directory')
 
-tf.app.flags.DEFINE_string('output_dir', './Folds/tf/gender_test_fold_is_0',
+tf.app.flags.DEFINE_string('output_dir', './Folds/tf/gender_test_fold_is_4',
                            'Output directory')
 
 tf.app.flags.DEFINE_string('train_list', 'gender_train.txt',
