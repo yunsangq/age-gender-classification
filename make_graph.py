@@ -30,7 +30,7 @@ def acc_disp(iter, train, valid):
     plt.show()
 
 
-def load(filename):
+def gender_load(filename):
     f = open(filename, "r")
     data = json.load(f)
     f.close()
@@ -49,11 +49,35 @@ def load(filename):
     return train_cost, train_accuracy, val_cost, val_accuracy
 
 
+def age_load(filename):
+    f = open(filename, "r")
+    data = json.load(f)
+    f.close()
+
+    """
+    data = {"train_cost": self.train_cost,
+            "valid_cost": self.valid_cost,
+            "train_accuracy1": self.train_acc1,
+            "train_accuracy2": self.train_acc2,
+            "valid_accuracy1": self.valid_acc1,
+            "valid_accuracy2": self.valid_acc2}
+    """
+    train_cost = data["train_cost"]
+    train_accuracy1 = data["train_accuracy1"]
+    train_accuracy2 = data["train_accuracy2"]
+    val_cost = data["valid_cost"]
+    val_accuracy1 = data["valid_accuracy1"]
+    val_accuracy2 = data["valid_accuracy2"]
+
+    return train_cost, train_accuracy1, train_accuracy2, val_cost, val_accuracy1, val_accuracy2
+
+
 if __name__ == '__main__':
     iter = []
     for i in range(0, 30001, 100):
         iter.append(i)
+
     path = './Folds/tf/gender_test_fold_is_0/run-5508/train/gender_test_fold_0.json'
-    train_cost, train_accuracy, val_cost, val_accuracy = load(path)
+    train_cost, train_accuracy, val_cost, val_accuracy = gender_load(path)
     err_disp(iter, train_cost, val_cost)
     acc_disp(iter, train_accuracy, val_accuracy)
