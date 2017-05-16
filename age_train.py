@@ -62,6 +62,13 @@ class Train(object):
         with open(input_file, 'r') as f:
             self.md = json.load(f)
 
+        self.train_acc1 = []
+        self.train_acc2 = []
+        self.valid_acc1 = []
+        self.valid_acc2 = []
+        self.train_cost = []
+        self.valid_cost = []
+
     def train(self):
         images, labels, _ = distorted_inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
                                              mode='train',
@@ -77,11 +84,12 @@ class Train(object):
         self.total_loss = self.loss(logits, labels)
         self.train_op = self.optimizer(FLAGS.optim, FLAGS.eta, self.total_loss)
         self.train_top1 = tf.nn.in_top_k(logits, labels, 1)
-        self.train_top2 = tf.nn.in_top_k(logits, labels, 2)
+        self._train_labels = tf.cast(labels, tf.int32)
 
         self.val_total_loss = self.eval_loss(val_logits, val_labels)
         self.top1 = tf.nn.in_top_k(val_logits, val_labels, 1)
-        self.top2 = tf.nn.in_top_k(val_logits, val_labels, 2)
+        self._val_labels = tf.cast(val_labels, tf.int32)
+        self.val_logits = val_logits
 
         saver = tf.train.Saver(tf.global_variables())
         summary_op = tf.summary.merge_all()
@@ -118,9 +126,10 @@ class Train(object):
 
             cnt_top1 = cnt_top2 = 0.0
             start_time = time.time()
-            _, loss_value, train_top1, train_top2 = sess.run([self.train_op, self.total_loss,
-                                                              self.train_top1, self.train_top2],
-                                                             {self.pdrop: FLAGS.pdrop})
+            _, loss_value, train_top1, batch_labels, v = sess.run([self.train_op, self.total_loss,
+                                                                  self.train_top1, self._train_labels,
+                                                                  logits],
+                                                                  {self.pdrop: FLAGS.pdrop})
             duration = time.time() - start_time
 
             assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
@@ -136,25 +145,33 @@ class Train(object):
 
             # Loss only actually evaluated every 100 steps?
             if step % 100 == 0:
+                v = np.argmax(v, axis=1)
+                for i in range(len(v)):
+                    if v[i] == batch_labels[i] or v[i] == batch_labels[i] - 1 or v[i] == batch_labels[i] + 1:
+                        cnt_top2 += 1
                 cnt_top1 += np.sum(train_top1)
-                cnt_top2 += np.sum(train_top2)
                 print('Train')
                 print('step%d: loss = %.3f' % (step, loss_value))
                 print('step%d: precision @ 1 = %.3f (%d/%d)' %
                       (step, cnt_top1/len(train_top1), cnt_top1, len(train_top1)))
                 print('step%d: precision @ 2 = %.3f (%d/%d)' %
-                      (step, cnt_top2/len(train_top2), cnt_top2, len(train_top2)))
+                      (step, cnt_top2/len(v), cnt_top2, len(v)))
                 summary = tf.Summary()
                 summary.ParseFromString(sess.run(summary_op, {self.pdrop: FLAGS.pdrop}))
                 summary.value.add(tag='Precision @ 1', simple_value=cnt_top1/len(train_top1))
-                summary.value.add(tag='Precision @ 2', simple_value=cnt_top2/len(train_top2))
+                summary.value.add(tag='Precision @ 2', simple_value=cnt_top2/len(v))
                 summary.value.add(tag='cost', simple_value=loss_value)
                 summary_writer.add_summary(summary, step)
+                self.train_acc1.append(float(cnt_top1 / len(train_top1)))
+                self.train_acc2.append(float(cnt_top2 / len(v)))
+                self.train_cost.append(float(loss_value))
                 if step != 0:
                     self.eval_once(sess, step, val_writer, summary_op)
 
             if step % 1000 == 0 or (step + 1) == num_steps:
                 saver.save(sess, checkpoint_path, global_step=step)
+
+        self.save(run_dir + "/age_test_fold_0.json")
 
     # Every 5k steps cut learning rate in half
     def exponential_staircase_decay(self, at_step=5000, decay_rate=0.5):
@@ -219,10 +236,17 @@ class Train(object):
             print('Validation')
 
             while step < num_steps and not coord.should_stop():
-                predictions1, predictions2, loss_value = sess.run([self.top1,
-                                                                   self.top2,
-                                                                   self.val_total_loss],
-                                                                  {self.pdrop: 1})
+                predictions1, loss_value, v, batch_labels = sess.run([self.top1,
+                                                                      self.val_total_loss,
+                                                                      self.val_logits,
+                                                                      self._val_labels],
+                                                                      {self.pdrop: 1})
+                v = np.argmax(v, axis=1)
+                predictions2 = 0
+                for i in range(len(v)):
+                    if v[i] == batch_labels[i] or v[i] == batch_labels[i] - 1 or v[i] == batch_labels[i] + 1:
+                        predictions2 += 1
+
                 true_count1 += np.sum(predictions1)
                 true_count2 += np.sum(predictions2)
                 total_loss += loss_value
@@ -244,11 +268,26 @@ class Train(object):
             summary.value.add(tag='Precision @ 2', simple_value=precision2)
             summary.value.add(tag='cost', simple_value=total_loss)
             summary_writer.add_summary(summary, global_step)
+            self.valid_acc1.append(float(precision1))
+            self.valid_acc2.append(float(precision2))
+            self.valid_cost.append(float(total_loss))
         except Exception as e:  # pylint: disable=broad-except
             coord.request_stop(e)
 
         coord.request_stop()
         coord.join(threads, stop_grace_period_secs=10)
+
+    def save(self, filename):
+        data = {"train_cost": self.train_cost,
+                "valid_cost": self.valid_cost,
+                "train_accuracy1": self.train_acc1,
+                "train_accuracy2": self.train_acc2,
+                "valid_accuracy1": self.valid_acc1,
+                "valid_accuracy2": self.valid_acc2}
+        f = open(filename, "w")
+        json.dump(data, f)
+        f.close()
+        print("save json data.")
 
 
 if __name__ == '__main__':

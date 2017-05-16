@@ -62,6 +62,11 @@ class Train(object):
         with open(input_file, 'r') as f:
             self.md = json.load(f)
 
+        self.train_acc = []
+        self.valid_acc = []
+        self.train_cost = []
+        self.valid_cost = []
+
     def train(self):
         images, labels, _ = distorted_inputs(FLAGS.train_dir, FLAGS.batch_size, FLAGS.image_size,
                                              mode='train',
@@ -143,11 +148,15 @@ class Train(object):
                 summary.value.add(tag='Precision @ 1', simple_value=cnt_top1 / len(train_top1))
                 summary.value.add(tag='cost', simple_value=loss_value)
                 summary_writer.add_summary(summary, step)
+                self.train_acc.append(float(cnt_top1 / len(train_top1)))
+                self.train_cost.append(float(loss_value))
                 if step != 0:
                     self.eval_once(sess, step, val_writer, summary_op)
 
             if step % 1000 == 0 or (step + 1) == num_steps:
                 saver.save(sess, checkpoint_path, global_step=step)
+
+        self.save(run_dir+"/gender_test_fold_0.json")
 
     # Every 5k steps cut learning rate in half
     def exponential_staircase_decay(self, at_step=5000, decay_rate=0.5):
@@ -232,12 +241,23 @@ class Train(object):
             summary.value.add(tag='Precision @ 1', simple_value=precision1)
             summary.value.add(tag='cost', simple_value=total_loss)
             summary_writer.add_summary(summary, global_step)
+            self.valid_acc.append(float(precision1))
+            self.valid_cost.append(float(total_loss))
         except Exception as e:  # pylint: disable=broad-except
             coord.request_stop(e)
 
         coord.request_stop()
         coord.join(threads, stop_grace_period_secs=10)
 
+    def save(self, filename):
+        data = {"train_cost": self.train_cost,
+                "valid_cost": self.valid_cost,
+                "train_accuracy": self.train_acc,
+                "valid_accuracy": self.valid_acc}
+        f = open(filename, "w")
+        json.dump(data, f)
+        f.close()
+        print("save json data.")
 
 if __name__ == '__main__':
     train = Train()

@@ -45,9 +45,10 @@ def eval_loss(logits, labels):
 
 
 def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval):
+    _labels = tf.cast(labels, tf.int32)
     _loss = eval_loss(logits, labels)
     top1 = tf.nn.in_top_k(logits, labels, 1)
-    top2 = tf.nn.in_top_k(logits, labels, 2)
+    # top2 = tf.nn.in_top_k(logits, labels, 2)
 
     checkpoint_path = '%s/run-%d/train' % (FLAGS.train_dir, FLAGS.run_id)
 
@@ -70,7 +71,17 @@ def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval)
         print(FLAGS.batch_size, num_steps)
 
         while step < num_steps and not coord.should_stop():
-            v, predictions1, predictions2, loss_value = sess.run([logits, top1, top2, _loss])
+            v, predictions1, loss_value, batch_labels = sess.run([logits, top1, _loss, _labels])
+            # print(np.argmax(v, axis=1))
+            # print(batch_labels)
+            # print(predictions1)
+            # print('')
+            v = np.argmax(v, axis=1)
+            predictions2 = 0
+            for i in range(len(v)):
+                if v[i] == batch_labels[i] or v[i] == batch_labels[i] - 1 or v[i] == batch_labels[i] + 1:
+                    predictions2 += 1
+
             true_count1 += np.sum(predictions1)
             true_count2 += np.sum(predictions2)
             total_loss += loss_value
