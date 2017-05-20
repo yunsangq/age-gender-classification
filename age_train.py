@@ -14,7 +14,7 @@ import math
 
 LAMBDA = 0.01
 MOM = 0.9
-tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
+tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_2',
                            'Training directory')
 
 tf.app.flags.DEFINE_string('eval_data', 'valid',

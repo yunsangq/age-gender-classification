@@ -74,10 +74,17 @@ def age_load(filename):
 
 if __name__ == '__main__':
     iter = []
-    for i in range(0, 30001, 100):
+    for i in range(0, 50001, 100):
         iter.append(i)
 
-    path = './Folds/tf/gender_test_fold_is_0/run-5508/train/gender_test_fold_0.json'
+    i = 4
+    path = './Folds/tf/gender_test_fold_is_'+str(i)+'/gender_test_fold_'+str(i)+'.json'
     train_cost, train_accuracy, val_cost, val_accuracy = gender_load(path)
     err_disp(iter, train_cost, val_cost)
     acc_disp(iter, train_accuracy, val_accuracy)
+
+    path = './Folds/tf/age_test_fold_is_'+str(i)+'/age_test_fold_'+str(i)+'.json'
+    train_cost, train_accuracy1, train_accuracy2, val_cost, val_accuracy1, val_accuracy2 = age_load(path)
+    err_disp(iter, train_cost, val_cost)
+    acc_disp(iter, train_accuracy1, val_accuracy1)
+    acc_disp(iter, train_accuracy2, val_accuracy2)

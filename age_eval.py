@@ -10,10 +10,10 @@ from model import inference, get_checkpoint
 import os
 import json
 
-tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_0',
+tf.app.flags.DEFINE_string('train_dir', './Folds/tf/age_test_fold_is_1',
                            'Training directory (where training data lives)')
 
-tf.app.flags.DEFINE_integer('run_id', 7390,
+tf.app.flags.DEFINE_integer('run_id', 14603,
                             'This is the run number (pid) for training proc')
 
 tf.app.flags.DEFINE_string('device_id', '/gpu:0',

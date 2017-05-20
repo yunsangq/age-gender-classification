@@ -61,7 +61,7 @@ def eval_once(sess, saver, summary_writer, summary_op, logits, labels, num_eval)
         for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
             threads.extend(qr.create_threads(sess, coord=coord, daemon=True,
                                              start=True))
-        num_steps = int(math.ceil(num_eval / FLAGS.batch_size))
+        num_steps = int(math.ceil(num_eval / FLAGS.batch_size))-1
         true_count1 = 0
         total_loss = 0.0
         total_sample_count = num_steps * FLAGS.batch_size
